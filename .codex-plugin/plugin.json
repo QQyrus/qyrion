@@ -1,0 +1,23 @@
+{
+  "name": "qyrion-agent-plugin",
+  "version": "0.2.0",
+  "description": "Test the app you are building on real cloud devices through the qyrion CLI: session operations, codebase-driven scenario generation, diff-driven test selection, and mid-run question answering.",
+  "author": {
+    "name": "Qyrus"
+  },
+  "license": "UNLICENSED",
+  "keywords": ["qyrus", "device-testing", "mobile", "appium", "device-farm", "testing"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Qyrion Agent Plugin",
+    "shortDescription": "Real-device testing for the app you are building",
+    "longDescription": "Drives Qyrus AI device sessions through the qyrion CLI. Skills cover direct session operations, generating and running device test scenarios from the codebase, selecting the minimal device test set for a git diff, and safely answering questions the device agent asks back mid-run.",
+    "developerName": "Qyrus",
+    "category": "Developer Tools",
+    "capabilities": ["Read"],
+    "defaultPrompt": [
+      "Test this app build on a real Android device.",
+      "What should I test on device for this diff?"
+    ]
+  }
+}

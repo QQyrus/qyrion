@@ -1,0 +1,11 @@
+{
+  "name": "qyrion-agent-plugin",
+  "version": "0.2.0",
+  "description": "Test the app you are building on real cloud devices through the qyrion CLI: session operations, codebase-driven scenario generation, diff-driven test selection, and mid-run question answering.",
+  "author": {
+    "name": "Qyrus"
+  },
+  "license": "UNLICENSED",
+  "keywords": ["qyrus", "device-testing", "mobile", "appium", "device-farm", "testing"],
+  "skills": "./skills/"
+}
