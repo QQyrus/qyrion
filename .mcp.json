@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "qyrus": {
+      "command": "python3",
+      "args": [
+        "-c",
+        "import os; from pathlib import Path; os.execvp('uv', ['uv', 'run', '--quiet', '--script', str(Path(os.environ.get('CLAUDE_PLUGIN_ROOT') or os.getcwd()) / 'scripts/qyrus_mcp.py')])"
+      ],
+      "cwd": "."
+    }
+  }
+}

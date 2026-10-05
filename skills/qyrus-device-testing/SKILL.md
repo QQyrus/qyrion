@@ -3,6 +3,8 @@ name: qyrus-device-testing
 description: Tests the app being built on real cloud devices end to end - discovers user journeys from the codebase, proposes ranked test scenarios, uploads the app build, and drives Qyrus AI device sessions through the qyrion CLI to a verdict-and-evidence report. Use for requests like "test this app/build on a real device", "run a smoke or E2E pass on device", or "verify this app build". Do not use for web browser testing, for selecting tests from a specific git diff or PR (use qyrus-change-impact), or for plain qyrion command help (use qyrion-cli).
 ---
 
+<!-- Distilled from: shared/cli-contract.md, shared/event-contract.md, shared/safety-policy.md, apps/qyrion/docs/getting-started.md. -->
+
 # Test the app on real devices
 
 Turn "test my app" into ranked scenarios, then into Qyrion device sessions,
@@ -23,13 +25,11 @@ Read before starting:
 1. CLI handshake: `qyrion capabilities --json` (resolution order and failure
    guidance in the CLI contract). Abort with install/upgrade instructions if
    missing or too old.
-2. Auth + team: probe with `qyrion auth teams --json`. If it fails or no team
-   is selected, run the first-run setup flow from
-   `references/cli-contract.md` § "Authentication, profiles, and first-run
-   setup" (user runs `qyrion configure` in their own terminal, or exports the
-   env vars; multiple teams → ask the user which one, then
-   `qyrion auth use-team <team-id>`). Never prompt for or print the three
-   credential values.
+2. Auth + team: use `references/credentials.md` for shared setup and
+   guide-first MCP team discovery. Confirm the intended team UUID, then verify
+   Qyrion access with helper-wrapped `qyrion sessions list --json`. Multiple
+   teams without a selection require user choice. Do not gate this workflow
+   on `qyrion auth teams` or print credential values.
 3. Project mapping: if the repo has a `qyrion.yml`, parse it for app
    name/platform, preferred device pool, path→journey hints, and test-account
    aliases (see `references/qyrion-yml.md`). It is optional — proceed without
@@ -68,12 +68,13 @@ Deduplicate against saved tests when a project id is known:
 `qyrion tests list --project <id> --json` → classify each proposal as
 `covered`, `extend_existing`, or `new`.
 
-## Phase C — Plan gate (default: stop and ask)
+## Phase C — Confirm execution scope
 
-Present the ranked scenario table (title, intent, device, est. sessions,
-risk) and get the user's approval before any device run, unless the user
-already pre-approved the exact scope ("run the top 3 smoke scenarios" counts;
-"test my app" does not). Device runs cost real device time.
+Present the ranked scenario table (title, intent, device, estimated sessions,
+risk). Proceed within the user-authorized test scope and budget; ask only
+when the proposed runs materially exceed it or necessary scope is missing.
+A request to execute a bounded test permits that execution. Device runs
+consume real device time; avoid an unrequested broad matrix.
 
 In plan-only requests, stop here and output the plan.
 

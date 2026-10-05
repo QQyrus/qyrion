@@ -6,45 +6,65 @@ instead of prose.
 
 ## Exit 3 — authentication / authorization failure
 
-The three credentials are wrong, expired, or incomplete. Check in order:
+Identify the failing endpoint before changing credentials. Updated Qyrion
+`auth teams` uses TestHub `/api/cli/auth/teams`; older binaries call gateway
+`/usermgmt/v2/api/team-list` directly and can return 401 while MCP succeeds.
+Use MCP discovery for plugin setup; do not rotate a working key or add a
+gateway token merely because the older discovery route fails.
+For a relevant Qyrion service call, check:
 
 1. **Application URL** (`QYRION_APP_URL` or profile): must be the exact Qyrus
    URL the user logs in to (e.g. `https://app.qyrus.com`). A wrong URL can
    also masquerade as 404s.
-2. **API key** (`QYRION_API_KEY`): expired or revoked keys return auth
-   failures on every call.
-3. **Gateway token** (`QYRION_AUTHORIZATION`): raw token and
-   `Bearer <token>` both work; anything else does not.
-4. In CI, `QYRION_TEAM_ID` must be a team the credentials can access — get it
-   once via `qyrion auth teams` on a configured machine.
+2. **API key** (`QYRION_API_KEY`): confirm it belongs to the selected tenant
+   and has access to the failing service; MCP success is not proof of that.
+3. In CI, `QYRION_TEAM_ID` must be a team the credentials can access — get it
+   through MCP team discovery and preserve the returned UUID exactly.
 
 Remediation: the user re-runs `qyrion configure` in their own terminal
-(interactive wizard — the agent must not drive it) or fixes the env vars.
-Verify with the probe `qyrion auth teams --json`, then re-select the team if
-needed (`qyrion auth use-team <team-id>`; multiple teams → ask the user which
-one). Full flow: cli-contract.md § "Authentication, profiles, and first-run
+(interactive wizard — the agent must not drive it) or updates the shared private env file via `qyrus-setup`.
+Current Qyrion never sends its legacy Authorization input, so adding a token
+does not change the team-list request. Verify the selected Qyrion scope with
+helper-wrapped `qyrion sessions list --json`; re-select the team if needed
+(`qyrion auth use-team <team-id>`; multiple teams → ask the user which one).
+Full flow: cli-contract.md § "Authentication, profiles, and first-run
 setup". Never ask the user to paste credential values into the chat.
 
 ## Team-scoped calls fail after auth succeeds
 
-`auth teams --json` works but sessions/apps/devices calls fail or land in the
-wrong workspace: no team (or the wrong team) is selected. List teams, confirm
-the intended one with the user, then `qyrion auth use-team <team-id>` (or set
+MCP team discovery works but sessions/apps/devices calls fail or land in the
+wrong workspace: check the selected team and service authorization. Discover
+teams with MCP, confirm the intended UUID, then `qyrion auth use-team <team-id>` (or set
 `QYRION_TEAM_ID` in CI). Check `--profile` too — a command run with a
 different profile than the one configured uses different stored credentials
 and team.
 
-## Exit 4 / HTTP 404 with code `backend_route_missing`
+## Exit 4 / HTTP 404
 
-The CLI is newer than the backend it is talking to: the route the command
-needs is not deployed in that environment yet. This is not a CLI bug and not
-an auth problem.
+Check the response source before deciding that a route is missing. Updated
+Qyrion uses `backend_route_missing` only for an explicit gateway route miss;
+resource or unspecified 404s are `not_found`. Older builds label every
+artifact 404 `backend_route_missing`, which is not reliable evidence.
 
-- Tell the user which command hit it and that the backend feature is not
-  deployed for their environment.
-- Cross-check `qyrion capabilities --json` — if the corresponding feature
-  flag is `false`, treat the feature as unavailable and degrade (e.g. skip
-  screenshot downloads) instead of retrying.
+Use the canonical `artifact_id` from `sessions artifacts`. Updated Qyrion
+encodes colons in that ID for the gateway and supports short event IDs after
+an explicit unknown-artifact response. A listing that succeeds while the
+canonical download returns 404 can indicate an older client failing to encode
+`:`. Follow the bundled prerequisite runbook to refresh the client, then
+repeat the read-only check.
+
+## HTTP 422 on saved-test replay
+
+Inspect `tests get` for curated replayable steps and execution inputs. A
+newly created test with zero steps cannot be replayed merely by supplying a
+start URL. Updated machine output reports `invalid_usage` (exit 2); arbitrary
+server text and input values are not echoed.
+
+## HTTP 5xx on session creation or replay
+
+A run may already have been persisted before browser/runtime startup failed.
+Check `sessions list/result` before repeating the creation; do not blindly
+retry or report a run as never created based on the HTTP status alone.
 
 ## Exit 4 — other backend availability failures
 
@@ -54,17 +74,18 @@ error `code` and `message` to the user and stop; do not hammer the backend.
 
 ## `capabilities` command not found (exit 2 / unknown command)
 
-The installed CLI predates this plugin's contract. Stop and point the user at
-the install guide (`apps/qyrion/docs/getting-started.md`: GitHub Releases
-binaries, macOS `.pkg`, or `npx @qqyrus/qyrion`). Do not attempt the workflow
-against an old CLI.
+The installed CLI predates this plugin's contract. Use `prerequisites.md` to
+upgrade through its existing trusted source and repeat the handshake once.
+Preserve profiles and explicit overrides. If still incompatible, report the
+missing capability; do not attempt the workflow against an old CLI.
 
 ## npx fallback fails to download / 401 from npm
 
-`@qqyrus/qyrion` is served from a private npm registry. The user needs the
-one-time `~/.npmrc` scope setup described in the getting-started guide, and
-(while the repo is private) a `QYRION_GITHUB_TOKEN`/`GH_TOKEN` with package
-read access. This is user setup — do not create or request tokens yourself.
+`@qqyrus/qyrion` is served from a private npm registry. Prefer the verified
+public binary installation in `prerequisites.md` when no npm source was
+explicitly required. If the user selected npm, use existing registry access
+or ask them to authenticate through its normal secure flow; never request
+token values in chat or silently replace an explicitly selected source.
 
 ## Run stuck before any device action (`PENDING_CONCURRENCY`)
 

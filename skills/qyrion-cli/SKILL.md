@@ -1,11 +1,13 @@
 ---
 name: qyrion-cli
-description: Starts, monitors, replies to, downloads artifacts from, and cancels Qyrus AI device sessions through the qyrion CLI. Use for explicit qyrion commands, direct session operations (start/stream/send/question/result/cancel), artifact/screenshot download, app upload, device or test listing, and troubleshooting qyrion CLI errors or exit codes. Do not use for deciding what to test (use qyrus-device-testing) or for git-diff test impact analysis (use qyrus-change-impact).
+description: Starts, monitors, replies to, downloads artifacts from, and cancels Qyrus AI mobile and web sessions through the qyrion CLI. Use for explicit qyrion commands, direct session operations (start/stream/send/question/result/cancel), artifact/screenshot download, app upload, device or test listing, and troubleshooting qyrion CLI errors or exit codes. Do not use for deciding what to test (use qyrus-device-testing) or for git-diff test impact analysis (use qyrus-change-impact).
 ---
+
+<!-- Distilled from: shared/prerequisites.md, shared/cli-contract.md, shared/event-contract.md, shared/safety-policy.md, apps/qyrion/docs/getting-started.md. -->
 
 # Qyrion CLI operations
 
-Direct, single-session operations against the Qyrus device cloud through the
+Direct, single-session operations against the Qyrus device and browser cloud through the
 `qyrion` CLI. Use structured modes only (`--json` / `--jsonl`); never scrape
 human-formatted output.
 
@@ -17,35 +19,36 @@ Read before the first call in a task:
 
 ## Preflight (mandatory, in order)
 
-1. Resolve the CLI: `QYRION_CLI` env override → `qyrion` on `PATH` → pinned
-   `npx @qqyrus/qyrion` (tell the user before using the npx fallback; never
-   auto-install silently).
+1. Resolve the CLI: `QYRION_CLI` env override → `qyrion` on `PATH`. If missing,
+   own setup using `references/prerequisites.md`: announce and install from
+   a verified source, then continue. No separate prerequisite prompt is needed.
 2. Handshake: `qyrion capabilities --json`.
    - If the command is unknown or fails with a usage error, the CLI is too
-     old for this plugin. Stop and tell the user to install/upgrade per the
-     Qyrion getting-started guide (`apps/qyrion/docs/getting-started.md` in
-     the Qyrus repo; binaries on the repo's Releases page, or
-     `npx @qqyrus/qyrion`). Do not improvise against an old CLI.
+     old for this plugin. Upgrade through its trusted installation source
+     using `references/prerequisites.md`, then repeat the handshake once.
+     Report a remaining blocker; do not improvise against an old CLI.
    - Check the `features` flags before using gated commands (artifact
      download, `sessions question`, `--after-sequence`); see the CLI
      contract's gating table.
-3. Probe auth: `qyrion auth teams --json`.
-   - Exit 0 with teams → authenticated; make sure a team is selected (see
-     step 4).
-   - Exit 3 → credentials rejected; ask the user to refresh their API key /
-     gateway token.
-   - Exit 2 / missing configuration → first-run setup
-     (`references/cli-contract.md` § "First-run setup"): either tell the user
-     to run `qyrion configure` in their own terminal (interactive wizard —
-     never drive it yourself), or have them export `QYRION_APP_URL` /
-     `QYRION_API_KEY` / `QYRION_AUTHORIZATION` in the agent's environment.
-     Never prompt for or print credential values; re-probe afterwards.
-4. Confirm team selection: if the probe listed multiple teams and no team is
-   configured, show the team names to the user and ask which to use — never
-   guess — then persist it with `qyrion auth use-team <team-id>` (or
-   `QYRION_TEAM_ID` in CI). A single team may be auto-selected; say so.
+3. Resolve credentials and team through `references/credentials.md`: use
+   Qyrus MCP's guide and `qyrus_teams_get_by_api_key`, preserving the returned
+   team UUID. Do not require the CLI's separate gateway `auth teams` call;
+   its failure does not invalidate successful MCP authentication.
+4. Confirm team selection: if multiple teams are listed and no team is
+   configured, show their names and ask which to use — never guess — then
+   persist with `qyrion auth use-team <team-id>` or `QYRION_TEAM_ID` in the
+   private file. A single team may be auto-selected; say so. Verify Qyrion
+   authorization with helper-wrapped `qyrion sessions list --json`.
    Honor `--profile <name>` if the user works with multiple environments and
    pass the same profile to every subsequent command.
+
+## Web sessions
+
+For a website, require `features.web_sessions`, then use `--platform web`
+and `--start-url <website-url>` without mobile device/app flags. See the
+browser commands in `references/cli-contract.md`. Use `qyrus-web-testing`
+for exploration and export to durable Aegis tests. Shared credentials are
+loaded with `references/credentials.md`; wrap every CLI invocation.
 
 ## Core operations
 
@@ -121,7 +124,7 @@ logged, pasted, or committed.
 | 0 | Success / requested stop condition reached | proceed |
 | 1 | Objective failed, blocked, cancelled, or timed out | inspect events + result; report verdict |
 | 2 | Invalid usage or missing configuration | fix the command; check `--help` |
-| 3 | Auth/authorization failure | see troubleshooting: verify the three credentials |
+| 3 | Auth/authorization failure | see troubleshooting: verify key, tenant, and team |
 | 4 | Backend availability failure | see troubleshooting |
 | 130 | Interrupted (SIGINT) | re-attach with `sessions stream <run_id>` |
 

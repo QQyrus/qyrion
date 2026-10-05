@@ -1,12 +1,14 @@
 ---
 name: answer-qyrion-agent-questions
-description: Answers questions a running Qyrus device-agent session asks back mid-run - detects clarification_requested events or sessions parked waiting for input, classifies the question, gathers codebase evidence, and replies through qyrion sessions send. Use when a qyrion session asks a question, a JSONL stream shows clarification_requested, or a session is parked at waiting_user_input. Escalates credentials, OTPs, destructive consent, production approval, and ambiguous business decisions to the user - never answers those, and never answers any question by guessing.
+description: Answers questions a running Qyrus mobile or web session asks back mid-run - detects clarification_requested events or sessions parked waiting for input, classifies the question, gathers codebase evidence, and replies through qyrion sessions send. Use when a qyrion session asks a question, a JSONL stream shows clarification_requested, or a session is parked at waiting_user_input. Escalates credentials, OTPs, destructive consent, production approval, and ambiguous business decisions to the user - never answers those, and never answers any question by guessing.
 ---
 
-# Answer questions from a Qyrion device session
+<!-- Distilled from: shared/cli-contract.md, shared/event-contract.md, shared/safety-policy.md, apps/qyrion/docs/getting-started.md. -->
 
-The device agent can ask the caller something mid-run (a route, a test
-account, expected copy, whether to proceed). The run parks with the device
+# Answer questions from a Qyrion session
+
+The mobile or browser agent can ask the caller something mid-run (a route, a test
+account, expected copy, whether to proceed). The run parks with cloud resources
 still allocated until an answer arrives. This skill turns those questions
 into evidence-backed answers — or fast, safe escalations.
 

@@ -11,14 +11,14 @@ Resolve the executable in this order and use the first hit:
 1. `QYRION_CLI` environment variable — an explicit path to the executable.
    Always honor it when set.
 2. `qyrion` on `PATH`.
-3. Pinned npm runner: `npx @qqyrus/qyrion@<pinned-version>` (the npm wrapper
-   published by the Qyrion release workflow). Requires npm registry auth for
-   the `@qqyrus` scope; see the install guide.
+3. If missing, follow `references/prerequisites.md` to install a verified
+   public release binary or the explicitly selected source checkout, then
+   repeat resolution. Existing private npm installations remain supported.
 
-Never auto-install anything without telling the user first. If steps 1–2 fail,
-say so, name the npx fallback you intend to run, and point the user at the
-install guide (`apps/qyrion/docs/getting-started.md` in the Qyrus repo, or the
-plugin README's install pointer) before running it.
+Tell the user what needs installing and perform it within the setup/session
+request. Do not make the user enumerate dependencies or hand them a manual
+installation checklist. Preserve explicit executable overrides and respect
+host installation restrictions.
 
 ## Capabilities handshake (always the first call)
 
@@ -46,8 +46,9 @@ Expected shape:
 Interpretation:
 
 - Command missing / unknown (usage error, exit 2): the installed CLI predates
-  the plugin contract. Stop and tell the user to upgrade per the install
-  guide. Do not attempt workarounds against an old CLI.
+  the plugin contract. Follow `references/prerequisites.md` to upgrade through
+  its trusted installation source and repeat the handshake once. Report a
+  persistent compatibility blocker; do not improvise against an old CLI.
 - `event_schema_versions` must include `"1"`.
 - Feature gates (check before using the gated surface):
 
@@ -57,6 +58,8 @@ Interpretation:
 | `artifact_presign` | `sessions artifacts` / `sessions presign` / `sessions download` |
 | `stream_cursor` | `sessions stream --after-sequence <n>` |
 | `idempotent_create` | idempotency keys on session create |
+| `web_sessions` | `--platform web --start-url <website-url>` |
+| `web_live_view` | web `--view` / `sessions view` |
 | `run_input_required_exit` | treating `qyrion run` exit `5` as the "agent question pending" signal (older binaries hang until `--timeout` and exit `1` instead) |
 
 If a required flag is `false`, tell the user which feature the backend/CLI
@@ -65,77 +68,44 @@ rather than calling the gated command and parsing its failure.
 
 ## Authentication, profiles, and first-run setup
 
-Qyrion needs exactly three credentials, plus a selected team:
+Qyrion requires the Qyrus application URL and API key, plus a selected team
+for team-scoped operations. Gateway Authorization is optional legacy input
+and is never sent by current Qyrion clients.
 
 | Value | Env var |
 |---|---|
-| Application URL (the Qyrus URL the user logs in to) | `QYRION_APP_URL` |
-| API key | `QYRION_API_KEY` |
-| Gateway Authorization token (raw or `Bearer <token>` — both work) | `QYRION_AUTHORIZATION` |
-| Team id (skips interactive team selection) | `QYRION_TEAM_ID` |
+| Qyrus tenant URL (not the website under test) | `QYRION_APP_URL` |
+| Shared API key | `QYRION_API_KEY` (mapped from private `X-API-Key`) |
+| Selected team | `QYRION_TEAM_ID` |
 
-The application URL is the only endpoint the user ever supplies — qyrion
-derives everything else from it. Agents must never prompt for, print, echo,
-or store credential VALUES, and must never place them in session messages,
-files, command arguments, or logs. Precedence everywhere is:
-command-line flag → env var → stored profile.
+### First-run setup
 
-### Probe auth state first
+Read `references/credentials.md` (or `shared/credentials.md` in the plugin
+repository). Ask the user to create a private env file with `X-API-Key` and
+`QYRION_APP_URL` and provide its path. Use the helper to validate it, remember
+the path, and wrap all Qyrion calls. The helper derives and writes the MCP
+endpoint. Never shell-source a key containing hyphens or echo secret values.
 
-```bash
-qyrion auth teams --json
-```
+Discover teams through Qyrus MCP using the flow in `references/credentials.md`:
+guide first, then `qyrus_teams_get_by_api_key` with `{}`. The separate gateway
+route used by `qyrion auth teams` is not a required plugin preflight; its 401
+does not establish that the key is invalid on the other Qyrus surfaces.
+Missing configuration means use the setup skill. `qyrion configure` in the
+user's own terminal remains an alternative for CLI-only keyring setup; it
+asks for the app URL and key, not a gateway token. Keyring-only setup does
+not configure the hosted Aegis MCP or SDK.
 
-- Exit `0` with a team list → credentials work; continue to team selection.
-- Exit `3` → credentials present but rejected (expired/invalid API key or
-  gateway token). Ask the user to refresh them.
-- Exit `2` (or a missing-configuration error) → nothing configured yet; run
-  first-run setup below.
-
-### First-run setup — two paths
-
-**Path A — user at a terminal (preferred for local development).** Tell the
-user to run, in their own terminal:
-
-```bash
-qyrion configure
-```
-
-It interactively prompts for the three credentials, fetches their teams, and
-lets them pick one; everything is stored in the OS keyring under the active
-profile. The agent must NOT try to drive this wizard (it requires interactive
-prompts) — hand it to the user, wait, then re-run the probe.
-
-**Path B — non-interactive (agent shells, CI).** Ask the user to export the
-three env vars in the environment the agent runs in (shell profile or CI
-secret store — never pasted into the conversation or committed):
-
-```bash
-export QYRION_APP_URL="https://app.qyrus.com"
-export QYRION_API_KEY="..."        # secret
-export QYRION_AUTHORIZATION="..."  # secret
-```
-
-Then complete team selection yourself (see below) and persist it with
-`qyrion auth use-team <team-id>` or `QYRION_TEAM_ID`.
+Direct Qyrion precedence remains command flags → environment → keyring.
+Never put credential values in command flags. Shared-file mode deliberately
+uses that file's values rather than unrelated exported Qyrion overrides.
 
 ### Team selection
 
-Most operations are team-scoped and fail without a selected team. After the
-probe succeeds:
-
-```bash
-qyrion auth teams --json
-```
-
-The payload contains a team list under `teams` (or `items`, possibly nested
-under `data`); each item's id is its `uuid` (fallbacks: `team_id`, `teamId`,
-`id`) and its display name is `name`/`teamName`. Handle all of these key
-variants when parsing.
-
-- Exactly one team → select it and tell the user which one you selected.
-- Multiple teams → present the names to the USER and ask which to use; never
-  guess (sessions, uploads, and results land in that team's workspace).
+Most operations are team-scoped and fail without a selected team. Use the
+MCP discovery/selection contract in `references/credentials.md`. Preserve the
+returned team UUID exactly; an organization ID is not a team ID. Revalidate
+an existing selection, select a sole team when none was chosen, or ask the
+user to choose among multiple teams.
 
 Persist the choice:
 
@@ -143,17 +113,18 @@ Persist the choice:
 qyrion auth use-team <team-id>    # stores it in the active profile
 ```
 
-or set `QYRION_TEAM_ID` in CI. (`qyrion auth teams --select` is the
-interactive picker for users at a terminal; agents use `use-team`.)
+or set `QYRION_TEAM_ID` in the selected private file (also suitable for CI).
+Verify the selected Qyrion scope with helper-wrapped
+`qyrion sessions list --json`; MCP success alone is not Qyrion authorization.
 
 ### Profiles
 
-Every command accepts `--profile <name>` (default `default`). Credentials and
-the selected team are stored per profile in the OS keyring — never in
-plaintext files. Use separate profiles for separate environments (e.g.
-`--profile staging` vs `--profile prod`) instead of swapping env vars; pass
-the same `--profile` consistently through a whole task, including to
-subagents running parallel sessions.
+Every command accepts `--profile <name>` (default `default`). Interactive
+CLI setup stores credentials/team per profile in the OS keyring. The plugin
+shared-file flow uses a private dotenv file and overrides profile credentials
+and service URLs. Select a different private file to change its environment;
+changing `--profile` alone cannot override that file. Pass a consistent profile
+throughout a task when using a profile-selected team.
 
 ## Output modes
 
@@ -177,7 +148,7 @@ Never scrape human-formatted output. If a command lacks `--json`, check
 | 0 | Success: objective passed, or the requested stop condition was reached |
 | 1 | Objective failed, blocked, cancelled, or timed out |
 | 2 | Invalid usage or missing configuration |
-| 3 | Authentication or authorization failure (check the three credentials) |
+| 3 | Authentication or authorization failure (check key, tenant, and team) |
 | 4 | Backend availability failure |
 | 5 | `qyrion run` parked on an agent question with no way to reply (`input_required`) |
 | 130 | Interrupted (SIGINT) |
@@ -203,7 +174,7 @@ Setup and inventory:
 
 ```bash
 qyrion capabilities --json
-qyrion auth teams --json                 # list teams for the credentials
+qyrion auth teams --json                 # direct gateway lookup; not the plugin setup gate
 qyrion devices list --platform android --json
 qyrion apps list --json
 qyrion apps upload ./app.apk --platform android --name "My App" \
@@ -221,6 +192,23 @@ qyrion run "Log in and verify the dashboard loads" \
 `--timeout` (default 1800, `0` disables) is a client-side execution budget;
 its clock pauses while an agent question waits for a reply. Keep values
 ≤ 3600.
+
+Browser execution uses the same lifecycle and evidence contract:
+
+```bash
+qyrion run --message-file ./web-objective.md --platform web \
+  --start-url https://test.example.com --mode ci --timeout 1800 --jsonl
+qyrion sessions create --message-file ./web-objective.md --platform web \
+  --start-url https://test.example.com --mode ci --jsonl
+qyrion sessions steps <run_id> --locators --json
+```
+
+Require `web_sessions`; omit mobile-only `--device-ref` and `--app`.
+`run` waits/streams. `sessions create` without `--stream` or `--view`
+returns after bootstrap and submission, while execution continues. Always
+retain the run ID and inspect the terminal result later. It is not proof of
+completion. Check `--help` before using options on an older installed CLI.
+The Qyrus tenant URL and the target website URL are separate values.
 
 Interactive session lifecycle (live mode — parks between objectives):
 
