@@ -1,5 +1,51 @@
 # Changelog
 
+## 0.3.2 — 2026-10-05
+
+- Add a single HTML landing page with QyrusAI branding, Qyrus light/dark
+  themes, agent-owned setup, private credentials guidance, example tasks,
+  and a redacted API-key tutorial video with written instructions. It also
+  presents the value-loop stages, the seven assurance loop recipes, and the
+  nine bundled skills, with scroll and hover motion that turns off for
+  reduced-motion readers.
+- Package the page and media with the public plugin. The release mirror
+  configures GitHub Pages and verifies the mirrored commit and served HTML.
+- Bump all host manifests to 0.3.2 for the new package content.
+
+## 0.3.1 — 2026-10-05
+
+- Document the confirmed 0.3.4-beta Windows Rich JSON encoding failure and
+  the separate CLI fix. Require parseable output as well as exit status;
+  preserve credentials and distinguish plugin refresh from binary upgrade.
+- Replace Windows CRT `exec*e` launches with a shared waiting subprocess for
+  the CLI/SDK wrapper and MCP bootstrap; preserve stdio, executable overrides
+  and exit status, including native Windows failure codes. POSIX keeps exec.
+  Add process-boundary regressions and a native Windows release-test gate.
+  The later supplied traceback identifies a separate CLI encoding error;
+  it does not confirm the earlier reported native access violation. Native
+  Windows validation and the affected user's read-only retry remain pending.
+- Select the newest published public CLI release including betas, using the
+  release list rather than GitHub's stable-only `/releases/latest`. Setup
+  downloads only the platform binary/archive without checksum or signature
+  checks; Windows instructions cover `qyrion.exe`, user PATH and capability
+  verification. Binary timeouts are reported separately from release discovery.
+- Bundle the `qyrusai-assure` Claude marketplace with plugin source `./`,
+  portable from the development package to the public repository root.
+- Document persistent Claude installation, updates, safe handling of local
+  symlinks and existing personal registrations, and host activation status.
+  Setup completes its checks in the original request without a second setup
+  prompt or ad hoc project marketplace/Git-exclude changes.
+- Bump all host manifests to 0.3.1 so cached plugin updates are discoverable;
+  preserve working user-selected CLI installations.
+- Rename the install ID to `qyrusai-assure` in all host manifests and the
+  Claude catalog. Add the Claude rename map and document migration for old
+  personal registrations; keep the source directory and release mirror path.
+- Verified with Claude Code 2.1.289: strict manifest validation, isolated
+  local installation through a resolved symlink, and cached Git installation
+  from a temporary local repository. Claude reports all nine skills and one
+  `qyrus` MCP definition. Authenticated Qyrus calls and interactive session
+  reload were not repeated for this packaging change.
+
 ## Unreleased — 2026-09-30
 
 - Correct CLI troubleshooting for TestHub team discovery, encoded artifact

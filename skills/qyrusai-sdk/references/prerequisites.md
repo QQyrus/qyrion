@@ -30,6 +30,11 @@ actual host permission is missing. Respect explicit no-install constraints.
    changed PATH; a working shell alone does not prove MCP can launch. Resolve
    this before declaring setup complete rather than reinstalling repeatedly.
 
+A working newer `python3` can run the bootstrap; installing managed Python
+3.12 for the SDK does not require replacing that interpreter. The bundled
+Windows launcher uses subprocesses to avoid CRT `exec*e` crashes; changing
+the default Python version alone is not a fix for that launch path.
+
 ## Qyrion
 
 For full plugin setup, prepare Qyrion as well. For an explicitly MCP-only or
@@ -39,21 +44,42 @@ SDK-only task, defer Qyrion until a session workflow needs it.
   and check the features needed for the task. Preserve a working installation;
   an invalid explicit override is a configuration problem, not permission to
   silently substitute another executable.
-- If missing, prefer the platform binary from
-  [Qyrus's public releases](https://github.com/QQyrus/qyrion/releases).
-  Inspect release metadata and actual asset names; prefer the latest stable
-  release, or identify the beta explicitly if only a prerelease is available.
-  Download the chosen artifact and its same-release `SHA256SUMS.txt`, verify
-  the hash, then extract/install to a user-owned bin directory on PATH.
+- If missing, install the platform binary from the newest published
+  [Qyrus release](https://github.com/QQyrus/qyrion/releases), including a
+  prerelease/beta when it is newest. Use the public release list at
+  `https://api.github.com/repos/QQyrus/qyrion/releases?per_page=100`, following
+  pagination when present. Select the `qyrion/v*` release with the most recent
+  `published_at`, excluding drafts and unpublished entries; report its version
+  and beta status. Do not prefer an older stable release over a newer beta.
+  Do not use `/releases/latest`: GitHub excludes prereleases there, and its
+  404 does not mean no downloadable release exists.
+- Match the host OS/architecture to an uploaded binary in that release's
+  `assets` and download its returned `browser_download_url`. Do not construct
+  a versioned URL or pin the example version from an earlier setup report.
+  Download only the binary/archive; do not fetch `SHA256SUMS.txt`, calculate
+  hashes, or require a separate signature check during plugin setup.
   Current release targets are macOS arm64, Linux x64, and Windows x64.
-  Inspect archives before extraction; do not bypass OS security blocks.
+  Extract/install to a user-owned bin directory on PATH; inspect archives
+  before extraction and respect any actual OS execution block.
+- On Windows x64, select `qyrion-<version>-windows-x64.exe` and save it as
+  `qyrion.exe`, for example under `%LOCALAPPDATA%\Programs\Qyrion`. Add that
+  directory to the current process and user PATH without replacing existing
+  entries, then run the installed executable's `--version` and
+  `capabilities --json`. No checksum file or private repository access is
+  needed for this public-binary installation.
+- Use a bounded download timeout and at most one retry of the binary download.
+  If it still fails, report the actual binary download error and release/asset
+  name; continue independent MCP/SDK setup. Do not try checksum URLs or probe
+  private source access to diagnose a public asset timeout. If the user obtains
+  that official binary separately, continue installation from its local path.
 - For an unsupported binary platform or an explicitly selected source
   checkout, use the verified `apps/qyrion` package from `QQyrus/df-ai-session`:
   `uv tool install --python 3.12 /absolute/checkout/apps/qyrion`.
   That source requires repository access. A plugin-only folder does not
   contain the CLI source; never invent a relative `apps/qyrion` path or install
   an unrelated PyPI package named `qyrion`.
-- Upgrade an obsolete CLI through its existing trusted installation source,
+- Upgrade an obsolete CLI through its existing trusted installation source
+  (public-binary installs use the newest published release selection above),
   then repeat the capabilities handshake once. Preserve profiles and keys.
   A required feature still absent after upgrade is a compatibility blocker;
   do not loop on upgrades or fabricate a replacement command.
@@ -65,6 +91,8 @@ The release asset contract comes from
 `apps/qyrion/dev-docs/release-process.md`; source installation requirements
 come from `apps/qyrion/pyproject.toml`. uv tool installations use isolated
 environments ([tool documentation](https://docs.astral.sh/uv/concepts/tools/)).
+Release-list behavior is documented in
+[GitHub's release API](https://docs.github.com/en/rest/releases/releases#list-releases).
 
 ## Credentials and completion
 

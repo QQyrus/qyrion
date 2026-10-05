@@ -5,12 +5,16 @@ description: Set up or install QyrusAI Assure end to end, including missing Pyth
 
 # Configure Qyrus once
 
-<!-- Distilled from: shared/prerequisites.md, shared/credentials.md, scripts/qyrus_env.py, scripts/qyrus_mcp.py, apps/qyrion/src/qyrion/client/auth.py. -->
+<!-- Distilled from: README.md, .claude-plugin/marketplace.json, shared/prerequisites.md, shared/credentials.md, scripts/qyrus_env.py, scripts/qyrus_mcp.py, apps/qyrion/src/qyrion/client/auth.py. -->
 
 “Set up QyrusAI Assure” is sufficient: own dependency preparation, shared
-credentials, connection checks, and continuation of the user's task. Read
+credentials, connection checks, and continuation of the user's task. In Claude
+Code, first follow `references/claude-installation.md` for registration,
+symlink handling, existing installations, and activation status. Read
 `references/prerequisites.md` for detection and installation; perform missing
 user-local installs within the setup request instead of handing back a checklist.
+For a missing Qyrion CLI, use the newest published public release, including
+betas; setup downloads only the platform binary without checksum-file checks.
 Use `references/credentials.md` for the bundled configure helper and path
 precedence. Reuse a supplied/saved/default private file; ask for a new file/path
 only when missing, never its contents. The helper installs the pinned SDK and
@@ -33,3 +37,9 @@ Keep guide-first MCP team discovery for plugin setup. Updated Qyrion
 `auth teams` uses TestHub; older binaries call usermgmt directly and can
 reject a key that works for MCP. Preserve returned team UUIDs; never select
 an org ID.
+
+Report registration, dependency/connection checks, and host activation
+separately. When setup checks have succeeded and only a reload/new session
+remains, give that single next step; do not ask the user to say "set up" again.
+Preserve a working editable Qyrion installation; a source version different
+from the public CLI release is not by itself a failed capability check.

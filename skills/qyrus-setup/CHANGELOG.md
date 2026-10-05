@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.3.1 — 2026-10-05
+
+- Document the Windows Rich JSON encoding failure and the required CLI fix;
+  a traceback with exit 0 is not successful setup or proof of bad credentials.
+- Use the shared Windows subprocess launcher for credential-wrapped CLI/SDK
+  commands and MCP; distinguish native launch crashes from auth failures
+  and resolve helper paths from the installed plugin.
+- Refresh the shared setup runbook: choose the newest published CLI release
+  including betas, download only the platform binary without checksum
+  checks, and handle Windows installation and download timeouts explicitly.
+- Use `qyrusai-assure` as the plugin ID; distinguish the bundled Claude
+  rename map from migration of old personal or other-host registrations.
+- Add the Claude marketplace registration and migration reference; resolve
+  local paths before registration and preserve existing user installations.
+- Separate successful setup checks from pending host activation; complete
+  setup during the original request and retain a working editable CLI.
+
 ## Unreleased — 2026-09-30
 
 - Distinguish updated TestHub team discovery from older direct gateway

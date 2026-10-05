@@ -2,6 +2,8 @@
 
 ![QyrusAI](assets/qyrusai-logo.png)
 
+[Installation guide and API-key video](https://qqyrus.github.io/qyrion/)
+
 ## Install with your coding agent
 
 Paste this into Codex or Claude Code:
@@ -19,12 +21,18 @@ Your agent will tell you if the host needs a new chat or restart to load it.
 See [installation details](#install--refresh) for agent/host instructions and
 [private credentials](#one-private-key-file) for the file format.
 
+The [landing page](https://qqyrus.github.io/qyrion/) includes the setup prompt,
+a video showing how to generate your X-API-Key, and example tasks. To preview
+it from a local checkout, open `index.html` or serve the plugin folder with
+`python3 -m http.server 8766` and visit `http://localhost:8766`.
+See [page maintenance](docs/landing-page.md) when updating the tutorial.
+
 ## What it includes
 
 QyrusAI Assure brings Qyrus MCP (Aegis), Qyrion mobile/web sessions, and the
 public `qyrusai` Python SDK into one coding-agent plugin. Its installation
-identifier remains `qyrion-agent-plugin` for compatibility with existing
-installations.
+identifier is `qyrusai-assure`. Existing `qyrion-agent-plugin` installations
+should migrate to the new ID using the host instructions below.
 
 An agent can read a connected work item, generate candidate scenarios, execute
 checks, create reusable Qyrus web/API assets, collect evidence, and return
@@ -76,22 +84,29 @@ be shell-sourced. See [credential contract](shared/credentials.md) and
 
 ## Setup and first use
 
-After installing the plugin, say **“Set up QyrusAI Assure.”** Its setup skill
+If you only installed the plugin, say **“Set up QyrusAI Assure.”** Its setup skill
 checks and installs missing local dependencies, reuses an existing credential
 file or asks for its path, runs the bundled configure helper, and verifies
 the requested surfaces. Users do not need to name prerequisite checks.
 The agent follows [the setup runbook](shared/prerequisites.md); local installs
 are part of setup, while host restrictions or unavailable access are reported
 as concrete blockers. Plugin registration alone does not execute installers.
+If your original request was to set up QyrusAI Assure, the agent completes
+these steps during that request. A host reload does not require repeating setup.
 
 Setup prepares these dependencies:
 
 - `python3` and `uv` on the agent host's PATH. The MCP launcher uses Python 3.12+ and an
   isolated, pinned `fastmcp==4.0.10` script dependency; first launch may download
   that runtime/dependency. Prewarm it before reconnecting MCP if startup times out.
-- Qyrion CLI for device/browser runs, installed from a verified
-  [public release](https://github.com/QQyrus/qyrion/releases) or the user's
-  selected source checkout, preserving working installations and profiles.
+- Qyrion CLI for device/browser runs, installed from the newest published
+  [public release](https://github.com/QQyrus/qyrion/releases), including betas,
+  or the user's selected source checkout. Setup downloads only the platform
+  binary/archive, without checksum-file or hash checks, and preserves working
+  installations and profiles. It uses the release list because GitHub's
+  `/releases/latest` endpoint excludes prereleases. On Windows, setup saves
+  the x64 executable as `qyrion.exe` on the user's PATH and checks its version
+  and capabilities.
 - `qyrusai==1.0.9` is prepared automatically by setup. SDK commands also
   ensure it is present, using the same uv-managed environment; no manual
   global pip installation is required.
@@ -167,18 +182,20 @@ telemetry, deployment, or data connectors as described in the loop catalog.
 ## Install / refresh
 
 The public [QQyrus/qyrion repository](https://github.com/QQyrus/qyrion)
-contains the plugin at its root. Agents receiving the setup prompt should
+contains the plugin at its root, including a Claude marketplace catalog.
+For Claude Code, use the [marketplace installation](#claude-code) below;
+Claude obtains the complete package. For hosts that need a local source,
 download/clone the complete package into a user-owned directory named
-`qyrion-agent-plugin`, preserving its hidden manifests, scripts, skills, and
+`qyrusai-assure`, preserving its hidden manifests, scripts, skills, and
 assets. Reuse a verified existing checkout without overwriting local changes.
 For example, a new checkout on macOS/Linux can use:
 
 ```bash
-git clone https://github.com/QQyrus/qyrion.git "$HOME/plugins/qyrion-agent-plugin"
+git clone https://github.com/QQyrus/qyrion.git "$HOME/plugins/qyrusai-assure"
 ```
 
-Read `skills/qyrus-setup/SKILL.md` from that downloaded folder and follow its
-bundled references directly during first-time setup; the skill does not have
+Read `skills/qyrus-setup/SKILL.md` from the installed/downloaded folder and
+follow its bundled references directly during first-time setup; the skill does not have
 to be installed or auto-discovered yet. Register the package with the current
 host as described below, prepare dependencies, and run `scripts/qyrus_env.py`
 through that setup workflow. Keep all user's credentials outside the clone
@@ -188,10 +205,10 @@ and plugin cache. Do not ask the user to enumerate prerequisite checks.
 
 Register `.codex-plugin/plugin.json` through Codex's personal plugin
 marketplace, preserving other entries. For the checkout above, the personal
-marketplace entry's source is `./plugins/qyrion-agent-plugin` relative to the
-user's home directory, and its plugin name is `qyrion-agent-plugin`.
+marketplace entry's source is `./plugins/qyrusai-assure` relative to the
+user's home directory, and its plugin name is `qyrusai-assure`.
 Use the host's plugin-installation tooling to register the source, then install
-`qyrion-agent-plugin` from that marketplace.
+`qyrusai-assure` from that marketplace.
 
 The entry to merge into `~/.agents/plugins/marketplace.json` is below. If the
 file does not exist, create a catalog with `"name": "personal"` and a
@@ -201,8 +218,8 @@ not duplicated.
 
 ```json
 {
-  "name": "qyrion-agent-plugin",
-  "source": { "source": "local", "path": "./plugins/qyrion-agent-plugin" },
+  "name": "qyrusai-assure",
+  "source": { "source": "local", "path": "./plugins/qyrusai-assure" },
   "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
   "category": "Developer Tools"
 }
@@ -211,25 +228,80 @@ not duplicated.
 Then install from the registered marketplace (using its actual name):
 
 ```bash
-codex plugin add qyrion-agent-plugin@personal
+codex plugin add qyrusai-assure@personal
 ```
 
 If the user's marketplace has a different name, use that verified name.
-The public repository is a plugin package, not a bundled marketplace catalog;
-register its local folder before attempting the install command. After setup
-and installation, start a new chat so Codex loads the skills and MCP server.
+The bundled `.claude-plugin/marketplace.json` uses Claude's schema, not Codex's;
+register the local folder in Codex before attempting the install command.
+After setup and installation, start a new chat so Codex loads the skills and MCP server.
 Refresh/reinstall after updates because Codex runs a cached copy.
+For an old `qyrion-agent-plugin` install, register and verify the new ID before
+disabling/removing only the old plugin through Codex's plugin tooling. Preserve
+other marketplace entries, private credentials, and working CLI installs;
+Claude's rename map does not migrate Codex or Cursor registrations.
 
 Codex loads `.mcp.json`: relative `cwd: "."` resolves to the installed
 plugin root. A small Python bootstrap resolves the script path and starts uv. The stdio launcher bridges to the inferred HTTPS MCP endpoint,
 loading the private file itself rather than relying on desktop shell exports.
 Only this launcher needs to execute locally; Qyrus tools remain remote.
+The bootstrap and credential wrapper use a waiting subprocess on Windows,
+preserving output and exit status without the CRT `exec*e` path. POSIX keeps
+process replacement. If an older cached wrapper reports an access violation
+while direct CLI checks work, update the plugin and retry the read-only check;
+the failure does not by itself establish bad credentials or a broken CLI.
+The `UnicodeEncodeError` seen when 0.3.4-beta renders a session list through
+Rich is a separate CLI output issue. It requires a CLI release containing the
+plain-JSON fix; a plugin refresh alone cannot change the downloaded executable.
+See [Windows JSON troubleshooting](shared/cli-contract.md#windows-json-encoding-failures).
 
 ### Claude Code
 
+Install persistently from the public repository in user scope:
+
 ```bash
-claude --plugin-dir /absolute/path/to/qyrion-agent-plugin
+claude plugin marketplace add QQyrus/qyrion
+claude plugin install qyrusai-assure@qyrusai-assure --scope user
+claude plugin list
+claude plugin details qyrusai-assure
 ```
+
+Inside a Claude session, the equivalent commands start with `/plugin`
+instead of `claude plugin`. The repository includes its own
+`.claude-plugin/marketplace.json`, named `qyrusai-assure`, with source `./`.
+The plugin therefore stays within the marketplace root in both the public
+repository and this development repository. No private repository access or
+handmade `personal` marketplace is needed.
+The catalog maps the former `qyrion-agent-plugin` name to `qyrusai-assure`
+for existing installs from this marketplace. After refreshing the catalog,
+run the install command above to populate the renamed plugin's cache.
+Older `@personal` registrations need the migration described below.
+
+During a setup request, read the installed `skills/qyrus-setup/SKILL.md`
+directly and complete dependency, credential and connection checks now.
+Run `/reload-plugins` if Claude requests it, or start a new session, to activate
+the skills and MCP server in that session. Report activation pending separately
+from successful helper/connection checks; do not ask the user to repeat setup.
+
+For subsequent public updates:
+
+```bash
+claude plugin marketplace update qyrusai-assure
+claude plugin update qyrusai-assure@qyrusai-assure
+```
+
+For explicit local development, resolve the plugin directory's real path
+before registering it as a local marketplace, or launch it for one session:
+
+```bash
+claude --plugin-dir /absolute/path/to/qyrusai-assure
+```
+
+`--plugin-dir` is a development launch, not persistent installation. Do not
+wrap a symlink into a marketplace whose root excludes its real target, create
+an ad hoc catalog in the user's project, or edit `.git/info/exclude` during
+setup. See [Claude setup and migration](skills/qyrus-setup/references/claude-installation.md)
+for existing `@personal` installs and unreleased local packages.
 
 The Claude manifest references the same `.mcp.json`. The bootstrap uses
 Claude's `CLAUDE_PLUGIN_ROOT` process environment when present, so it does not
@@ -272,10 +344,15 @@ MCP/Qyrion/SDK acceptance remain separate checks.
 Qyrion releases in the development repository trigger the public mirror after
 the CLI release succeeds. The mirror copies this entire plugin folder to
 `QQyrus/qyrion`'s `master` branch, including this README and
-`assets/qyrusai-logo.png`, and publishes the matching tag and CLI assets.
+`assets/qyrusai-logo.png` and `.claude-plugin/marketplace.json`, and publishes
+the matching tag and CLI assets.
 The README's relative image and setup links therefore work in both locations.
 Only changes included in that release commit are mirrored; pushing a normal
 feature branch does not update the public package.
+The plugin version in the host manifests is independent of the CLI release
+version; bump it when changing the plugin so cached installations receive
+updates. A working editable CLI may report the source version instead of the
+release version; setup verifies capabilities and its installation source.
 
 Sources: [public qyrusai](https://pypi.org/project/qyrusai/),
 [FastMCP proxy](https://gofastmcp.com/servers/providers/proxy),

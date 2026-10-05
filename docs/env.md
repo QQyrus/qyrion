@@ -35,3 +35,13 @@ slash; no custom port, path, embedded credentials, query, or fragment.
 inferred MCP endpoint with private permissions, then saves only the selected
 absolute path in `~/.config/qyrus/plugin.json`. Restart MCP after changes.
 `check` is offline presence/format validation, never proof of authentication.
+
+The CLI/SDK wrapper and MCP bootstrap share `scripts/qyrus_process.py`.
+On Windows it resolves the executable and uses `subprocess.run` with inherited
+stdio, a private child environment, no shell, and no automatic retry. It waits
+for completion and preserves the command's exit status, including native
+Windows failure bits. POSIX retains process replacement. This avoids the
+Windows CRT environment-building path used by `os.execvpe`, which has a
+[reported access-violation issue](https://github.com/python/cpython/issues/143327).
+The launch change neither alters credential precedence nor proves a particular
+reported crash was in that CRT path without a native trace.

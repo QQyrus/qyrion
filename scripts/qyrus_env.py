@@ -18,6 +18,8 @@ import sys
 import tempfile
 from urllib.parse import urlsplit
 
+from qyrus_process import launch_command
+
 
 class SetupError(ValueError):
     """Describe a configuration problem without disclosing file contents."""
@@ -202,7 +204,7 @@ def save_selection(path: Path) -> None:
 
 
 def main() -> int:
-    """Validate setup, remember a path, or replace this process with a command."""
+    """Validate setup, remember a path, or launch a credential-wrapped command."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=("check", "configure", "run", "sdk"))
     parser.add_argument("--env-file")
@@ -227,7 +229,7 @@ def main() -> int:
                 command = [*sdk_command(), *command]
             elif command[0] == "qyrion":
                 command[0] = env.get("QYRION_CLI", "qyrion")
-            os.execvpe(command[0], command, env)
+            return launch_command(command, env)
         print(json.dumps({"configured": True, "api_key_present": True,
                           "application_url_present": bool(env.get("QYRION_APP_URL")),
                           "team_present": bool(env.get("QYRION_TEAM_ID")),

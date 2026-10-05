@@ -4,6 +4,14 @@ Failure signatures and remediations. Always reproduce with `--json`/`--jsonl`
 so you get a structured `{"error": {code, message, retryable, remediation}}`
 instead of prose.
 
+## Windows `UnicodeEncodeError` while printing JSON
+
+Use [the shared CLI contract](cli-contract.md#windows-json-encoding-failures)
+to distinguish the 0.3.4-beta Rich encoding failure from authentication and
+native launch crashes. A fixed CLI binary is required; plugin updates alone
+do not replace an explicitly selected executable. Treat a traceback or partial
+JSON as failure even when an older wrapper reports exit 0.
+
 ## Exit 3 — authentication / authorization failure
 
 Identify the failing endpoint before changing credentials. Updated Qyrion

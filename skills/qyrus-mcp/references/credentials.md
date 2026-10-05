@@ -37,6 +37,20 @@ in examples are relative to the plugin root; resolve that from the loaded
 skill (`../../..` from a skill's `references/`), not from the project CWD.
 Use absolute script paths in agent calls. All Qyrion command examples in
 this plugin should be prefixed with this helper when using shared setup.
+Confirm `scripts/qyrus_env.py` exists under that installed root before running
+it; the current project/work directory may not contain the plugin package.
+
+The wrapper and MCP bootstrap use a waiting subprocess on Windows and process
+replacement on POSIX. Windows commands preserve stdio and exit status while
+keeping credentials in the child environment. If a cached older helper crashes
+with an access violation, update the plugin launcher before reinstalling a CLI
+that passes direct checks. Record the exact command, exit code and available
+stderr; a native crash does not establish an API authentication failure. Do
+not retry session creation to diagnose it. See the plugin environment reference
+and [CPython's Windows exec report](https://github.com/python/cpython/issues/143327).
+A `UnicodeEncodeError` from Rich JSON rendering is a separate CLI output bug;
+follow `cli-contract.md`'s Windows JSON guidance. A traceback with exit 0 is
+still a failed check; refreshing the wrapper only corrects exit propagation.
 
 Path precedence: `--env-file` (CLI helper only) → `QYRUS_ENV_FILE` → saved
 path → `~/.config/qyrus/credentials.env`. The bridge reads the same selection

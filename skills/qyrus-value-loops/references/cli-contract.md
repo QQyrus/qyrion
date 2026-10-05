@@ -1,7 +1,7 @@
 # Qyrion CLI contract (plugin copy)
 
 How a coding agent must locate, verify, and call the `qyrion` CLI. This copy is
-embedded in every skill of the qyrion-agent-plugin; the canonical source lives
+embedded in every skill of QyrusAI Assure; the canonical source lives
 at `shared/cli-contract.md` in the plugin repository.
 
 ## Resolving the CLI
@@ -132,6 +132,8 @@ throughout a task when using a profile-selected team.
 - `--jsonl`: one JSON object per line on stdout for streams (see the event
   contract). All human/Rich output goes to stderr in these modes; parse stdout
   only.
+- Updated CLI builds emit plain JSON with Unicode escapes. JSON parsing
+  restores the original text; do not interpret escapes as corrupted content.
 - Structured errors (in `--json`/`--jsonl` modes):
 
 ```json
@@ -140,6 +142,22 @@ throughout a task when using a profile-selected team.
 
 Never scrape human-formatted output. If a command lacks `--json`, check
 `qyrion <command> --help` before assuming a shape.
+
+### Windows JSON encoding failures
+
+A traceback through `_print_json` / `Rich` ending in `UnicodeEncodeError:
+'charmap' codec can't encode character '\u2192'` (seen in 0.3.4-beta) is a
+local output failure after the payload was fetched. It does not establish an
+API authentication error or native access violation. Record the exact
+executable, command, stderr and exit code; partial JSON or a traceback is not
+successful verification, even if an older wrapper reports exit 0.
+
+This requires a CLI binary containing the plain-JSON fix; updating only the
+plugin cannot patch an existing executable. Follow `prerequisites.md` to select
+the latest published release, preserve explicit overrides, and verify the
+read-only command. If that release still reproduces it, report the remaining
+CLI blocker and complete independent MCP/SDK setup. Do not rotate credentials,
+reinstall the same release repeatedly, or create a session as a diagnostic.
 
 ## Exit codes
 

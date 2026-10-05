@@ -4,7 +4,7 @@
       "command": "python3",
       "args": [
         "-c",
-        "import os; from pathlib import Path; os.execvp('uv', ['uv', 'run', '--quiet', '--script', str(Path(os.environ.get('CLAUDE_PLUGIN_ROOT') or os.getcwd()) / 'scripts/qyrus_mcp.py')])"
+        "import os, sys; from pathlib import Path; root = Path(os.environ.get('CLAUDE_PLUGIN_ROOT') or os.getcwd()); sys.path.insert(0, str(root / 'scripts')); from qyrus_process import launch_command; raise SystemExit(launch_command(['uv', 'run', '--quiet', '--script', str(root / 'scripts/qyrus_mcp.py')], dict(os.environ)))"
       ],
       "cwd": "."
     }

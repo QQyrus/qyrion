@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.1 — 2026-10-05
+
+- Document the Windows Rich JSON encoding failure and the required CLI fix;
+  a traceback with exit 0 is not successful setup or proof of bad credentials.
+- Use the shared Windows subprocess launcher for credential-wrapped CLI/SDK
+  commands and MCP; distinguish native launch crashes from auth failures
+  and resolve helper paths from the installed plugin.
+- Refresh the shared setup runbook: choose the newest published CLI release
+  including betas, download only the platform binary without checksum
+  checks, and handle Windows installation and download timeouts explicitly.
+
 ## Unreleased — 2026-09-30
 
 - Distinguish updated TestHub team discovery from older direct gateway
