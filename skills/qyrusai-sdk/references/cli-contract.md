@@ -20,6 +20,17 @@ request. Do not make the user enumerate dependencies or hand them a manual
 installation checklist. Preserve explicit executable overrides and respect
 host installation restrictions.
 
+Apply `execution-routing.md` before choosing an execution surface. Web and
+mobile objectives use Qyrion sessions unless the user chooses another tool;
+an unavailable Qyrion feature is not permission to use the host's browser.
+At task entry, follow `update-checks.md` for the throttled release check;
+use `qyrion version --json` for the version, not a root `--version` flag.
+
+Ordinary calls use the shared credential wrapper. Credential-bearing
+objectives and all later reads that can echo their history instead use
+`qyrus_private.py` as specified in `private-execution.md`. It loads the same
+environment and filters output/logs; plain `--message-file` is not redaction.
+
 ## Capabilities handshake (always the first call)
 
 Before any other qyrion command in a task, run:
@@ -46,8 +57,8 @@ Expected shape:
 Interpretation:
 
 - Command missing / unknown (usage error, exit 2): the installed CLI predates
-  the plugin contract. Follow `references/prerequisites.md` to upgrade through
-  its trusted installation source and repeat the handshake once. Report a
+  the plugin contract. Offer an update per `update-checks.md`, upgrade through
+  its trusted source only after acceptance, and repeat the handshake once. Report a
   persistent compatibility blocker; do not improvise against an old CLI.
 - `event_schema_versions` must include `"1"`.
 - Feature gates (check before using the gated surface):
@@ -57,7 +68,7 @@ Interpretation:
 | `session_questions` | `sessions question`, relying on `clarification_requested` frames |
 | `artifact_presign` | `sessions artifacts` / `sessions presign` / `sessions download` |
 | `stream_cursor` | `sessions stream --after-sequence <n>` |
-| `idempotent_create` | idempotency keys on session create |
+| `idempotent_create` | Reported create behavior; inspect live help/contract before using any key mechanism (current CLI has no caller-supplied create key flag) |
 | `web_sessions` | `--platform web --start-url <website-url>` |
 | `web_live_view` | web `--view` / `sessions view` |
 | `run_input_required_exit` | treating `qyrion run` exit `5` as the "agent question pending" signal (older binaries hang until `--timeout` and exit `1` instead) |
@@ -81,8 +92,8 @@ and is never sent by current Qyrion clients.
 ### First-run setup
 
 Read `references/credentials.md` (or `shared/credentials.md` in the plugin
-repository). Ask the user to create a private env file with `X-API-Key` and
-`QYRION_APP_URL` and provide its path. Use the helper to validate it, remember
+repository). Reuse the supplied/saved/default private env file before asking
+for a missing file with `X-API-Key` and `QYRION_APP_URL`. Use the helper to validate it, remember
 the path, and wrap all Qyrion calls. The helper derives and writes the MCP
 endpoint. Never shell-source a key containing hyphens or echo secret values.
 
@@ -272,13 +283,18 @@ qyrion sessions save-test <run_id> --project <project-id> --test-name "Login smo
 it. Any other process (a subagent, a later turn, a re-attach after SIGINT) can
 operate on the session with just that id: `sessions stream/send/question/
 result/cancel <run_id>`. Persist the run_id immediately after create; on
-SIGINT the CLI also prints the run id and a resume command to stderr.
+SIGINT the CLI also prints the run id and a resume command to stderr. Record
+scoped handles and final outcomes using `local-state.md`; never store raw
+objectives or credentials in that record.
 
 ## Long messages
 
 Never pass long objectives or answers as shell arguments (quoting bugs,
 command-history leakage). Write them to a temporary file and use
 `--message-file <path>` on `run`, `sessions create`, and `sessions send`.
+All three also support `--message-file -` for stdin. Follow `safety-policy.md`
+for authorized target-account credentials; message files/stdin do not prevent
+the submitted message from being retained in Qyrus session history.
 
 ## Modes
 

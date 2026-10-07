@@ -3,13 +3,24 @@ name: qyrion-cli
 description: Starts, monitors, replies to, downloads artifacts from, and cancels Qyrus AI mobile and web sessions through the qyrion CLI. Use for explicit qyrion commands, direct session operations (start/stream/send/question/result/cancel), artifact/screenshot download, app upload, device or test listing, and troubleshooting qyrion CLI errors or exit codes. Do not use for deciding what to test (use qyrus-device-testing) or for git-diff test impact analysis (use qyrus-change-impact).
 ---
 
-<!-- Distilled from: shared/prerequisites.md, shared/cli-contract.md, shared/event-contract.md, shared/safety-policy.md, apps/qyrion/docs/getting-started.md. -->
+<!-- Distilled from: shared/execution-routing.md, shared/local-state.md, shared/prerequisites.md, shared/cli-contract.md, shared/event-contract.md, shared/safety-policy.md, apps/qyrion/docs/getting-started.md. -->
 
 # Qyrion CLI operations
 
-Direct, single-session operations against the Qyrus device and browser cloud through the
+Direct session operations against the Qyrus device and browser cloud through the
 `qyrion` CLI. Use structured modes only (`--json` / `--jsonl`); never scrape
 human-formatted output.
+
+For credential-bearing objectives or session history, use the private
+input/output wrapper in `references/private-execution.md`, including on
+later reads. Plain `qyrus_env.py`/stdin does not redact returned objectives.
+
+For web/mobile objectives, this CLI is the default execution surface, not the
+host's browser/Playwright/CUA. Apply `references/execution-routing.md` before
+testing or searching saved tests: preserve explicit new/reuse intent and
+reuse known ticket inputs. Several independent objectives may use multiple
+CLI processes; follow `references/parallel-orchestration.md`, with subagents
+optional. Do not parallelize shared-account/state dependencies by assumption.
 
 Read before the first call in a task:
 
@@ -24,8 +35,9 @@ Read before the first call in a task:
    a verified source, then continue. No separate prerequisite prompt is needed.
 2. Handshake: `qyrion capabilities --json`.
    - If the command is unknown or fails with a usage error, the CLI is too
-     old for this plugin. Upgrade through its trusted installation source
-     using `references/prerequisites.md`, then repeat the handshake once.
+     old for this plugin. Offer an update using `references/update-checks.md`;
+     after acceptance upgrade through its trusted installation source and
+     repeat the handshake once. Preserve explicit source installs/pins.
      Report a remaining blocker; do not improvise against an old CLI.
    - Check the `features` flags before using gated commands (artifact
      download, `sessions question`, `--after-sequence`); see the CLI
@@ -41,6 +53,10 @@ Read before the first call in a task:
    authorization with helper-wrapped `qyrion sessions list --json`.
    Honor `--profile <name>` if the user works with multiple environments and
    pass the same profile to every subsequent command.
+
+Use the throttled update check at task entry via `references/update-checks.md`.
+The version command is `qyrion version --json`; no automatic replacement or
+background scheduler is implied.
 
 ## Web sessions
 
@@ -140,3 +156,5 @@ Report: the commands run (at a safe level — no credentials, no presigned
 URLs), run_id(s), final status and verdict, downloaded artifact paths, cited
 event `sequence_no` values, and anything left running (there should be
 nothing).
+Retain scoped run/test IDs and outcomes per `references/local-state.md`;
+never write raw objectives, questions, passwords or signed URLs to memory.

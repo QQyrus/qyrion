@@ -1,16 +1,18 @@
 ---
 name: qyrus-setup
-description: Set up or install QyrusAI Assure end to end, including missing Python, uv, Qyrion, and qyrusai dependencies and one private env-file path for MCP and web/mobile sessions. Use for plain setup/onboarding requests, missing or obsolete tools, shared X-API-Key, application URL or team selection, key rotation, and MCP connection/authentication failures.
+description: Set up or update QyrusAI Assure end to end, including missing Python, uv, Qyrion, and qyrusai dependencies and one private env-file path for MCP and web/mobile sessions. Use for plain setup/onboarding requests, accepted CLI updates, missing or obsolete tools, shared X-API-Key, application URL or team selection, key rotation, and MCP connection/authentication failures.
 ---
 
 # Configure Qyrus once
 
-<!-- Distilled from: README.md, .claude-plugin/marketplace.json, shared/prerequisites.md, shared/credentials.md, scripts/qyrus_env.py, scripts/qyrus_mcp.py, apps/qyrion/src/qyrion/client/auth.py. -->
+<!-- Distilled from: README.md, plugin.json, .claude-plugin/marketplace.json, shared/prerequisites.md, shared/credentials.md, shared/update-checks.md, shared/local-state.md, scripts/qyrus_env.py, scripts/qyrus_mcp.py, scripts/qyrus_antigravity.py, scripts/qyrus_updates.py, apps/qyrion/src/qyrion/client/auth.py. -->
 
 “Set up QyrusAI Assure” is sufficient: own dependency preparation, shared
 credentials, connection checks, and continuation of the user's task. In Claude
 Code, first follow `references/claude-installation.md` for registration,
-symlink handling, existing installations, and activation status. Read
+symlink handling, existing installations, and activation status. In Antigravity,
+follow `references/antigravity-installation.md` for native plugin placement and
+the credential-free MCP registration helper; preserve other connectors. Read
 `references/prerequisites.md` for detection and installation; perform missing
 user-local installs within the setup request instead of handing back a checklist.
 For a missing Qyrion CLI, use the newest published public release, including
@@ -19,6 +21,15 @@ Use `references/credentials.md` for the bundled configure helper and path
 precedence. Reuse a supplied/saved/default private file; ask for a new file/path
 only when missing, never its contents. The helper installs the pinned SDK and
 writes the derived MCP URL. Do not open secrets in model-visible tools.
+
+For an existing installation, follow `references/update-checks.md`: check at
+most once every four hours during plugin use, stay quiet when unchanged, and
+install an available update only when the user accepts or explicitly requests
+it. Keep source/editable/pinned installations and explicit overrides intact.
+After an accepted install, verify the running version and capabilities before
+recording completion. A plugin refresh and a CLI binary update are separate.
+See `references/local-state.md` for private result records and host-memory
+pointers. Do not read all references or repeat setup during every task.
 
 After local setup, check only the surfaces needed for the current request:
 

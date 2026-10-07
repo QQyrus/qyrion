@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.3.4 — 2026-10-06
+
+- Use the private execution wrapper for credential-bearing inputs and history,
+  filtering CLI echoes and isolating temporary logs.
+
+- Default objective-driven web/mobile execution to Qyrion, preserve new-test
+  versus existing-test intent, and reuse known ticket/login context.
+- Support independent concurrent CLI sessions without requiring subagents;
+  check account/state dependencies and clean up every owned session.
+- Correct the unsupported account-alias claim; apply host policies and safe
+  handling of authorized target test credentials, distinct from Qyrus keys.
+- Route reusable scoped metadata and accepted CLI updates through the shared
+  local-state and update-check references.
+
 ## 0.3.1 — 2026-10-05
 
 - Document the Windows Rich JSON encoding failure and the required CLI fix;

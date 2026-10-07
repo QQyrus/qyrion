@@ -3,13 +3,19 @@ name: qyrus-change-impact
 description: Selects the minimal real-device test set for a specific code change - reads the git diff, classifies behavior changes, maps them to existing saved Qyrus tests and new scenarios, produces an action plan table, then runs only the impacted set through the qyrion CLI. Use for "what should I test for this change/PR/diff", "validate this branch on a real device", or post-merge device validation of a change. Do not use for broad test generation from scratch with no diff in scope (use qyrus-device-testing) or for plain qyrion command help (use qyrion-cli).
 ---
 
-<!-- Distilled from: shared/cli-contract.md, shared/event-contract.md, shared/safety-policy.md, apps/qyrion/docs/getting-started.md. -->
+<!-- Distilled from: shared/execution-routing.md, shared/local-state.md, shared/cli-contract.md, shared/event-contract.md, shared/safety-policy.md, apps/qyrion/docs/getting-started.md. -->
 
 # Diff-driven minimal device test selection
 
 Given a base..head diff, decide which device tests must run unchanged, be
 updated then run, be newly created, or be proposed for retirement — then run
 only that minimal set and triage the results.
+
+Apply `references/execution-routing.md` to preserve the user's intent: saved
+tests can satisfy requested regression reuse, while explicitly requested new
+coverage uses fresh Qyrion web/mobile sessions. Do not substitute the host's
+browser/CUA. Ask about new versus existing coverage only when unclear; reuse
+known target, build and permitted login facts from the task/ticket.
 
 Read before starting:
 
@@ -21,8 +27,8 @@ Read before starting:
 
 ## Phase 1 — Preflight
 
-1. `qyrion capabilities --json` handshake (abort with install/upgrade
-   guidance per the CLI contract if missing/old), then shared setup and MCP
+1. `qyrion capabilities --json` handshake (own missing-tool setup and offer
+   accepted upgrades per `references/update-checks.md`), then shared setup and MCP
    team discovery per `references/credentials.md`. Confirm the selected team
    and verify Qyrion access with helper-wrapped `qyrion sessions list --json`.
    Do not require the separate gateway `qyrion auth teams` call; ask the user
@@ -135,3 +141,6 @@ Report: the classified diff summary, the plan table with final outcomes per
 row, verdicts with artifact file paths and event `sequence_no` citations,
 proposed test updates/retirements awaiting human review, and the result of
 the leftover-session sweep.
+Retain scoped returned IDs/outcomes per `references/local-state.md`; revalidate
+them on reuse. Independent runs may use multiple CLI calls from one agent
+under `references/parallel-orchestration.md`; subagents are optional.

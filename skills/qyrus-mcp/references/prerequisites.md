@@ -64,7 +64,7 @@ SDK-only task, defer Qyrion until a session workflow needs it.
 - On Windows x64, select `qyrion-<version>-windows-x64.exe` and save it as
   `qyrion.exe`, for example under `%LOCALAPPDATA%\Programs\Qyrion`. Add that
   directory to the current process and user PATH without replacing existing
-  entries, then run the installed executable's `--version` and
+  entries, then run the installed executable's `version --json` and
   `capabilities --json`. No checksum file or private repository access is
   needed for this public-binary installation.
 - Use a bounded download timeout and at most one retry of the binary download.
@@ -78,9 +78,19 @@ SDK-only task, defer Qyrion until a session workflow needs it.
   That source requires repository access. A plugin-only folder does not
   contain the CLI source; never invent a relative `apps/qyrion` path or install
   an unrelated PyPI package named `qyrion`.
-- Upgrade an obsolete CLI through its existing trusted installation source
-  (public-binary installs use the newest published release selection above),
-  then repeat the capabilities handshake once. Preserve profiles and keys.
+- Check for updates during active plugin tasks using `update-checks.md` and
+  the installed package's `scripts/qyrus_updates.py`; reuse its timestamped
+  check state rather than querying on every command. It does not schedule
+  background work. A newer release or missing feature is a reason to offer
+  an update, not authorization to replace an installed CLI.
+- Upgrade an obsolete CLI after the user accepts the concrete update (or
+  explicitly requested that update), through its existing trusted source.
+  For public-binary updates, discover the newest published release as above,
+  then install the exact release/asset the user accepted. Preserve the offer
+  while it is pending; a later release check must not change that selection.
+  Preserve working source/editable installs, version pins, executable
+  overrides, profiles, and keys; do not replace them based on version alone.
+  Repeat `version --json` and the capabilities handshake once after updating.
   A required feature still absent after upgrade is a compatibility blocker;
   do not loop on upgrades or fabricate a replacement command.
 - The private `@qqyrus/qyrion` npm wrapper remains an alternative for users

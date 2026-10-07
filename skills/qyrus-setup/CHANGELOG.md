@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.3.4 — 2026-10-06
+
+- Add quiet four-hour release checks during plugin use, user acceptance
+  before updates, and installed-version verification before recording success.
+- Route reusable output records to private local state beside the selected
+  credentials file; preserve source/editable installs and explicit overrides.
+
+## 0.3.3 — 2026-10-05
+
+- Add Antigravity 2.0/IDE and CLI installation guidance, explicit installed
+  bridge paths, private-file reuse, and independent work-tracker connections.
+- Register MCP through the new helper without printing or copying keys;
+  preserve other connectors and report native host validation separately.
+
 ## 0.3.1 — 2026-10-05
 
 - Document the Windows Rich JSON encoding failure and the required CLI fix;

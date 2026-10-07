@@ -10,15 +10,36 @@ reference does not override them or create permission for external actions.
   See `credentials.md`. Never request the key in chat or print/log it.
   Gateway Authorization is not required. Work-management connectors retain
   their own authentication; the Qyrus key does not grant access to them.
-- Never put credentials, passwords, OTPs, recovery codes, payment data, or
-  any secret into: a session message (`sessions send`, `run`, `sessions
-  create`), a `qyrion.yml` file, a fixture, an evidence report, or a command
-  argument. `qyrion.yml` may name test-account **aliases** only (e.g.
-  `smoke-user-1`); the device platform resolves aliases to real credentials
-  server-side.
-- If the device agent asks for a password, OTP, CAPTCHA answer, or payment
-  detail: never answer it yourself. Escalate to the user, and if they cannot
-  or should not provide it through the platform, cancel the session.
+- Distinguish the Qyrus API key from the account used to log into the app
+  under test. Never send the Qyrus key, connector tokens, or gateway tokens
+  in an objective. They authenticate tooling, not the tested app.
+- Ordinary test-account username/password details already supplied for the
+  authorized task (including its ticket) may be used for that target when
+  host policies permit. Do not ask for them again or invent a requirement
+  for the user to sign into the parent's browser. Keep values out of chat,
+  shell arguments/history, reports, plaintext exports/shared scripts, fixtures,
+  `qyrion.yml`, and local/host memory.
+- Qyrion accepts objective text via `--message-file -`, but JSON output and
+  execution logs can echo that text. For credential-bearing objectives and
+  every subsequent command that can return their history, follow
+  `private-execution.md` and use `scripts/qyrus_private.py` for private input,
+  filtered output, and temporary private logs. Plain stdin/file input alone
+  is insufficient. Use a host-permitted non-echoing handoff; never paste
+  literal secrets into a command, tool-call code, or output. The message is
+  still submitted to Qyrus and may persist in session history. Honor any
+  sending/retention restriction; ask only for a missing permitted login method.
+- Account aliases are labels for planning, not automatically resolved
+  credentials. The current CLI has no dedicated secret-reference field or
+  general server-side alias resolver; never promise one or send an alias
+  expecting it to log in. Inspect recorded steps before saving; do not
+  assume `save-test` redacts login values. Use a platform-supported secure
+  variable/reference facility only after verifying its live contract. If
+  saving needs a credential-storage choice outside the authorized scope,
+  resolve that choice at save time; the exploratory run can still proceed.
+- Missing credentials, OTP/MFA, recovery codes, CAPTCHA, payment details,
+  or host-required human login need the user's input through a permitted
+  channel. Do not bypass controls, fetch unrelated secrets, or delegate an
+  action the host prohibits. Bound the parked wait and cancel if blocked.
 - Artifact presigned URLs are short-lived secrets. Download artifacts to
   local files; never paste, log, or commit a presigned URL.
 
@@ -57,7 +78,7 @@ confirmation screen; do not confirm").
 - A live or parked mobile/web session holds cloud resources and consumes
   quota. Never leave sessions running when the task ends, errors out, or is aborted.
 - On any abort/failure path: `qyrion sessions list --json`, find sessions you
-  started that are `running` or `waiting_user_input`, and
+  started that are still active (including pending, running, or parked), and
   `qyrion sessions cancel <run_id>` each one. Cancellation is idempotent.
 - Bound every wait: use `--max-seconds` on streams and a park-wait budget
   (default 10 minutes) before escalating or cancelling.

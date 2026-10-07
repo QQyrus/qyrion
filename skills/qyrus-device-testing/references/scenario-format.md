@@ -53,23 +53,30 @@ Verify:
 - <assertion 2>
 
 Limits:
-- Use test account alias `<alias>` (the platform resolves it; you will not
-  be given a password by me).
+- Use the authorized test account for this target; follow the supplied
+  login instructions and ask if a required detail is missing.
 - Stop before <destructive/confirmation point>; do not confirm it.
 - If something is ambiguous or blocked, ask instead of improvising.
 ```
 
-Never include credentials, OTPs, or secrets. Keep one scenario per session;
-do not chain unrelated scenarios into one run.
+Planning files contain account labels only, never credentials. Supply any
+authorized target-account details separately under `safety-policy.md`; labels
+are not automatically resolved by the CLI. Keep one scenario per session;
+do not chain unrelated scenarios into one run. Serialize dependent scenarios
+or carry them in one session when they require its state.
 
 ## Dedup classes against saved tests
 
 Compare each proposal to `qyrion tests list --project <id> --json` by
 journey, step intent, and expected outcome:
 
-- `covered` — an existing saved test already asserts this; prefer
-  `qyrion tests rerun <test-id>` over a new session.
-- `extend_existing` — an existing test is close; propose the extension, run
-  the existing test now, and leave the test update as a follow-up proposal.
+- `covered` — an existing saved test already asserts this; rerun it when
+  reuse is the user's intent. Explicit new coverage still uses a fresh
+  Qyrion session; this classification informs the save/dedup decision.
+- `extend_existing` — an existing test is close; propose or perform the
+  authorized update. Do not substitute its run for an explicitly requested
+  new objective.
 - `new` — no adequate coverage; run as a fresh session. Only persist it
-  (`sessions save-test`) after a stable run and with user approval.
+  (`sessions save-test`) after inspecting the run and within the requested
+  save scope. A request to create and save is already authorization; do not
+  ask for the same permission again. Follow `execution-routing.md`.

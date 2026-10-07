@@ -5,13 +5,18 @@ description: Use the public qyrusai Python SDK with the shared Qyrus X-API-Key f
 
 # QyrusAI Python SDK
 
-<!-- Distilled from: https://pypi.org/project/qyrusai/ and qyrusai 1.0.9 wheel (_clients.py, configs.py, nova/nova.py), inspected 2026-09-29. -->
+<!-- Distilled from: shared/execution-routing.md, shared/local-state.md, https://pypi.org/project/qyrusai/ and qyrusai 1.0.9 wheel (_clients.py, configs.py, nova/nova.py), inspected 2026-09-29. -->
 
 Read `references/sdk-usage.md` for verified calls and response caveats;
 read `references/credentials.md` only for setup. Do not read every reference.
 Use the helper's `sdk` action: it automatically installs `qyrusai==1.0.9` if
 missing. Do not stop at manual installation instructions. For these examples, inspect signatures before adapting
 them to a different installed version. The package is separate from QAI.
+
+Apply `references/execution-routing.md`: scenario generation is not web/mobile
+execution. When execution is requested, pass reviewed objectives to the
+Qyrion web/mobile skills rather than opening the host's browser. Do not
+replace an explicit new-test request with a saved-script search.
 
 Use the agent's existing work-management connector to read the requested work
 item, then pass the relevant, authorized text to Nova's description method.
@@ -28,3 +33,5 @@ SDK calls may consume service quota. Use the user's requested scope; bound
 the subprocess duration and generation count. Do not print raw SDK exceptions,
 headers, clients, request objects, or full upstream bodies. Report sanitized
 failure categories and locally retained evidence after review.
+Use `references/local-state.md` for reusable scoped asset IDs/outcomes, never
+raw ticket content, account credentials, or unreviewed generated payloads.

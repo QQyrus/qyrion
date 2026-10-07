@@ -6,7 +6,7 @@
 
 ## Install with your coding agent
 
-Paste this into Codex or Claude Code:
+Paste this into Codex, Claude Code, or Antigravity:
 
 > Set up QyrusAI Assure from https://github.com/QQyrus/qyrion.
 
@@ -40,6 +40,53 @@ results to the source within the user's authorized scope. The loop recipes
 cover assurance, operations, and modernization; external connectors and
 permissions determine which steps are available. The plugin is not a scheduler
 or a service running in the background.
+
+## How testing works
+
+Ask for the outcome: “Create and save tests for this ticket” or “Run our
+existing checkout tests.” New web and mobile coverage runs through Qyrion's
+cloud agents. The plugin uses the URL and authorized test-account details
+already supplied for the task; it does not substitute the coding agent's
+own browser or ask users to choose among implementation tools.
+
+When the intent is unclear, the agent asks only: **“Create and save a new
+test, or look for an existing one?”** Explicit requests and preferences
+already given take precedence. Independent objectives can run concurrently;
+shared logins, test data, and dependencies must permit it. If simultaneous
+sign-in support is unknown, the agent asks about that dependency or runs
+sequentially. Each session remains bounded and is cleaned up by its owner.
+See [execution routing](shared/execution-routing.md) and
+[parallel sessions](shared/parallel-orchestration.md).
+
+Target-app login details are separate from the Qyrus API key. When the host
+permits using already-authorized test credentials, the plugin's
+[private execution helper](shared/private-execution.md) carries objective
+input to Qyrus and filters echoed text from CLI output, while isolating and
+removing temporary CLI logs. Such
+input may remain in Qyrus session history; a local private file or stdin does
+not make it a secret-vault channel. Human-only authentication steps still
+follow the host's rules. See [credential handling](shared/safety-policy.md).
+
+## Remembering results and checking updates
+
+The agent records reusable session, test, suite, and project IDs in a private
+`qyrusai-assure/` subfolder beside the selected credentials file. With the
+default setup this is `~/.config/qyrus/qyrusai-assure/`. Records are scoped
+to the Qyrus environment, team, and optional target origin; IDs are checked
+against the live service before reuse. Passwords, keys, objectives, raw
+responses, and signed URLs do not belong in these records. Hosts with a
+permitted memory facility may remember the record-store pointer and scoped
+IDs. The file store remains usable without host memory.
+
+During plugin use, the agent checks public Qyrion releases at most once
+every **four hours**, including published betas. A timestamped state file
+tracks checks, offers/declines, and verified installations. Unchanged or
+declined updates stay quiet; an available update is installed only after
+acceptance. Source/editable installations and executable overrides are
+preserved. This is an activity-triggered check, not a background timer;
+plugin/skill updates still use the host's plugin update mechanism.
+See [local records](shared/local-state.md) and
+[update checks](shared/update-checks.md) for commands and recovery.
 
 ## One private key file
 
@@ -308,6 +355,39 @@ Claude's `CLAUDE_PLUGIN_ROOT` process environment when present, so it does not
 depend on the project working directory. `/reload-plugins` or restart after
 changes. There is only one bundled Qyrus server definition.
 
+### Antigravity
+
+The root `plugin.json` lets Antigravity load the same nine skills. For
+Antigravity 2.0 or the standalone IDE, install the complete package under
+`~/.gemini/config/plugins/qyrusai-assure/` (global) or
+`<workspace>/.agents/plugins/qyrusai-assure/` (workspace-only). In Antigravity
+CLI, use `agy plugin install /absolute/path/to/qyrusai-assure` and locate the
+installed copy before setup. See Google's [plugin documentation](https://antigravity.google/docs/plugins).
+
+Say **“Set up QyrusAI Assure.”** The agent follows
+[Antigravity setup](skills/qyrus-setup/references/antigravity-installation.md),
+prepares prerequisites and the existing private file, then runs this helper
+from the installed package:
+
+```bash
+python3 scripts/qyrus_antigravity.py
+```
+
+It registers the Qyrus bridge in `~/.gemini/config/mcp_config.json`, using
+absolute executable/script paths and preserving other servers. The key stays
+in the private `.env`; Antigravity receives a local stdio connection. For a
+workspace-only install, pass `--config /absolute/workspace/.agents/mcp_config.json`.
+If the host shows a different config path, use that explicit path. Refresh MCP
+and verify guide/team discovery before claiming the connection works.
+
+Connectors such as Atlassian, Linear, and GitHub are separate MCP servers with
+their own authentication and permissions. They can supply work items to the
+Qyrus value-loop skills; the Qyrus key does not authenticate those services.
+See Google's [MCP documentation](https://antigravity.google/docs/mcp).
+This package supports local installation; it is not a claim of a Google
+marketplace listing. Native Antigravity discovery and live connection checks
+must still be verified on the target host.
+
 ### Cursor
 
 The existing Cursor skill manifest is retained, but native plugin/MCP loading
@@ -344,7 +424,8 @@ MCP/Qyrion/SDK acceptance remain separate checks.
 Qyrion releases in the development repository trigger the public mirror after
 the CLI release succeeds. The mirror copies this entire plugin folder to
 `QQyrus/qyrion`'s `master` branch, including this README and
-`assets/qyrusai-logo.png` and `.claude-plugin/marketplace.json`, and publishes
+`assets/qyrusai-logo.png`, the Antigravity root `plugin.json`/setup helper,
+and `.claude-plugin/marketplace.json`, and publishes
 the matching tag and CLI assets.
 The README's relative image and setup links therefore work in both locations.
 Only changes included in that release commit are mirrored; pushing a normal

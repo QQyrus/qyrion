@@ -1,5 +1,36 @@
 # Changelog
 
+## 0.3.4 — 2026-10-06
+
+- Make Qyrion the default executor for new web/mobile coverage; ask a plain
+  new-versus-existing preference only when intent is ambiguous, and reuse
+  known URLs and authorized target test-account details without a tool menu.
+- Remove the unsupported server-side account-alias claim and document the
+  actual objective input and session-history boundary.
+- Add private input/output handling for credential-bearing objectives and
+  history, including JSON echo filtering and temporary CLI-log cleanup.
+- Allow independent web/mobile objectives to run concurrently through
+  multiple CLI calls, with account/state dependency checks and owned cleanup.
+- Add private, scoped result records beside the credentials file and optional
+  host-memory pointers, without copying secrets or raw test transcripts.
+- Add cached four-hour public-release checks, quiet unchanged/declined state,
+  user-accepted upgrades, and verified installation timestamps.
+- Retain the offered release/asset across newer discovery results so a
+  verified user-selected installation can still be recorded correctly.
+- Bump Codex, Claude, and Cursor package manifests to 0.3.4 and verify new
+  helpers and distributed references in the public mirror package gate.
+
+## 0.3.3 — 2026-10-05
+
+- Add Antigravity's root plugin manifest and setup instructions for 2.0,
+  the standalone IDE, and CLI, reusing all nine existing skills.
+- Add credential-free MCP registration with absolute installed paths,
+  atomic JSON merging, conflict detection, and preserved connector settings.
+- Document separate work-tracker authentication and native host verification;
+  local packaging is independent of Google marketplace publication.
+- Bump Codex, Claude, and Cursor manifests to 0.3.3. Antigravity's documented
+  minimal manifest has no version field.
+
 ## 0.3.2 — 2026-10-05
 
 - Add a single HTML landing page with QyrusAI branding, Qyrus light/dark

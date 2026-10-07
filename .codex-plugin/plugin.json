@@ -1,6 +1,6 @@
 {
   "name": "qyrusai-assure",
-  "version": "0.3.2",
+  "version": "0.3.4",
   "description": "QyrusAI Assure combines Qyrus MCP, Qyrion mobile/web sessions, and qyrusai SDK skills for evidence-driven quality and work-management loops.",
   "author": {
     "name": "Qyrus"

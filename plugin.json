@@ -1,0 +1,4 @@
+{
+  "name": "qyrusai-assure",
+  "description": "QyrusAI Assure: Qyrus MCP, Qyrion web/mobile sessions, and qyrusai SDK skills. Run the bundled setup skill to connect Qyrus using your private credentials file."
+}

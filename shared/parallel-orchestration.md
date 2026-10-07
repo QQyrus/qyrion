@@ -1,81 +1,75 @@
-# Parallel session orchestration (plugin copy)
+# Parallel web and mobile sessions
 
-How to fan multiple Qyrion device sessions out to subagents safely. Applies
-whenever more than one scenario should run on devices in the same task.
+Scope: a Qyrus task whose objective can be divided into independent scenarios.
+Parallel sessions are supported through multiple Qyrion CLI invocations from
+one agent. Subagents are optional, not a prerequisite.
 
-## Ownership model: one subagent per session
+## Establish independence first
 
-Each subagent owns exactly one session for its full lifecycle:
+Split by independent outcomes with separate assertions and run IDs. Check
+account login rules, mutable test data, application state, device capacity,
+and ordering dependencies. Independent browsers/devices do not prove that
+the application's account or backend state is independent.
 
-```text
-create --jsonl (capture run_id)
-  → stream --until input-required --max-seconds <budget> --jsonl
-  → inspect events + download latest observe_raw screenshot
-  → decide: send next objective (--follow) | answer question | finish | cancel
-  → repeat until terminal
-  → result --json (verdict) + artifact downloads
-```
+- Separate accounts/data, or a known policy permitting concurrent logins and
+  nonconflicting state: run in parallel within the authorized scope/budget.
+- Same account with unknown simultaneous-login behavior: ask the one relevant
+  question, **"Can this test account be signed in on multiple sessions at once?"**
+  Reuse a prior answer for the same account policy/scope; do not ask every run.
+  While unanswered, execute sequentially if that safely meets the request.
+- Shared cart/profile mutation, one-login policy, or prerequisite/dependent
+  journeys: serialize the affected objectives. Do not force a parallel split.
+- A single end-to-end journey stays together when later checks depend on the
+  earlier session's login or state.
 
-Rules:
+Start with up to 2–3 independent sessions, or the user's lower run/concurrency
+budget. Do not expand into an unrequested device/browser matrix. More than
+three at once needs an agreed concurrency budget. When a session is
+`PENDING_CONCURRENCY`, stop submitting more and wait for capacity.
 
-- The subagent receives the full scenario (objective sequence, assertions,
-  device-ref, app id, park-wait budget) up front and returns a structured
-  verdict — it must not need to ask the orchestrator mid-run.
-- The subagent embeds the CLI contract, event contract, and safety policy —
-  never assume another skill is loaded in the subagent's context.
-- A subagent never touches a run_id it did not create.
-- Every subagent ends with its session in a terminal state: completed,
-  failed, or explicitly cancelled. No parked sessions may outlive a subagent.
+## One lifecycle owner per session
 
-## Concurrency caps
+The parent may own several independent sessions, or assign one to each
+available subagent. Each session has exactly one owner for sending messages,
+answering questions, collecting evidence, and cleanup. Pass the scenario,
+target, assertions, deadline, and safety limits to an assigned owner.
+Give subagents the CLI/event/safety contracts; do not assume their context.
 
-- Start with 2–3 concurrent sessions, never more without user approval.
-- Device Farm capacity is the real limit. A session sitting in
-  `PENDING_CONCURRENCY` is waiting for a device slot: do not start more
-  sessions while one is pending — wait or reduce concurrency.
-- Queue remaining scenarios and start the next only when a slot frees
-  (a running session reaches terminal state).
-
-## Naming and idempotency
-
-- Give every session a unique, greppable run name:
-  `<app>-<scenario-slug>-<yyyymmddHHMM>` (e.g. via `--run-name` where
-  supported, otherwise in the objective preamble).
-- When `capabilities` reports `idempotent_create: true`, key creates on
-  `{project, commit, scenario, device}` so a retried subagent re-attaches to
-  its existing run instead of double-allocating a device.
-
-## Aggregation
-
-The orchestrator collects from every subagent:
-
-- scenario id + title
-- verdict: `passed` / `failed` / `blocked` / `inconclusive` / `cancelled`
-- run_id and final status
-- evidence: local artifact file paths + event `sequence_no` citations
-- open questions or escalations raised mid-run
-
-Render one report table for the user. A scenario is only `passed` when the
-run completed AND the scenario's assertions are supported by the evidence —
-not merely because exit code was 0.
-
-## Mandatory final sweep
-
-At the end of the task — success, failure, or user abort — the orchestrator
-must sweep for leaked sessions:
+For each web objective, submit a separate helper-wrapped command:
 
 ```bash
-qyrion sessions list --json
+qyrion sessions create --platform web --start-url https://test.example.com \
+  --message-file ./objective-01.md --mode ci --timeout 1800 \
+  --run-name checkout-cart --jsonl
 ```
 
-Filter for sessions created by this task with status `running` or
-`waiting_user_input`, and cancel each:
+For mobile, use `--platform mobile --device-ref <ref> --app <app-id>` instead
+of `--start-url`. For supplied test credentials, use `private-execution.md`'s
+wrapper for the create and all history reads; never put values in arguments.
+Give each lifecycle owner access only to its authorized private inputs, not
+literal credentials in subagent prompts or result records. `sessions create`
+without `--stream` submits the run and returns while it continues remotely.
+Capture `run_id` immediately, record ownership, then submit the next
+independent objective. Separate `qyrion run` processes are also valid.
 
-```bash
-qyrion sessions cancel <run_id>
-```
+Monitor **all** active run IDs using bounded `sessions stream` calls or result
+polls; do not wait indefinitely on one while another is parked. Answer
+clarifications promptly. Stop launching new work if a shared setup failure
+invalidates the remaining objectives. Unique `--run-name` values help
+reconciliation; they are not an idempotency guarantee. After an ambiguous
+create, reconcile `sessions list` and the recorded IDs before retrying; do
+not invent a CLI idempotency flag.
 
-Cancellation is idempotent; cancelling an already-terminal run is safe.
-Report any session that could not be cancelled so the user can stop it from
-the Qyrus UI. Never skip the sweep: a leaked parked session holds a real
-device indefinitely.
+## Aggregate and clean up
+
+Collect each scenario's verdict, run ID, final status, supported assertions,
+local artifact paths/event sequence numbers, and pending questions. A pass
+requires assertion evidence, not merely CLI exit 0. Save scoped IDs/outcomes
+per `local-state.md`; no raw objectives or login details belong there.
+
+At task completion, failure, or abort, inspect `qyrion sessions list --json`
+and reconcile every task-owned ID. Cancel task-owned sessions still active,
+including pending/running/parked sessions, using
+`qyrion sessions cancel <run_id>`. Do not cancel another task's sessions.
+No active session may outlive its owner; report any failed cancellation so
+the user can stop it. Respect finite run/park budgets from `safety-policy.md`.

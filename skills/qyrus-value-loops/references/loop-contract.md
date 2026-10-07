@@ -11,22 +11,29 @@ Scope: multi-system workflows using Qyrus and an agent's existing connectors.
    requests. Only send the minimum authorized content to Qyrus services.
 2. **Define proof.** Map each requirement to an assertion, environment/build,
    test data, required capability, and expected artifact. Record unknowns.
+   Apply `execution-routing.md`: fresh web/mobile objectives use Qyrion;
+   inventory reuse follows explicit intent, not an automatic first step.
    State a finite execution budget appropriate to scope; if unspecified, start
-   with one representative scenario, at most one diagnostic rerun, and one
-   session at a time. Use existing user limits when supplied. Ask before a
+   with a representative scenario and at most one diagnostic rerun. Multiple
+   independently justified objectives may run concurrently under
+   `parallel-orchestration.md`, with known-safe account/state dependencies.
+   Use existing user limits when supplied. Ask before a
    materially larger spend. For parity, use equivalent inputs and define
    tolerated differences before comparing.
 3. **Prepare.** Read the relevant live MCP guide or CLI contract. Generate
-   candidate scenarios if useful, reconcile duplicates, and resolve targets.
+   candidate scenarios if useful and resolve targets. Dedup informs a saved
+   asset decision; it must not replace an explicitly requested fresh run.
    Preserve functional assertions during locator repair. No imaginary IDs or
    locators and no pass based solely on generated text.
 4. **Execute and retain handles.** Save each run/test ID as soon as it is
-   returned. Maintain a local, secret-free ledger in the user's working area
-   (not inside the plugin cache) with source revision, scope, test IDs, run IDs,
-   status, assertion evidence, intended write-back, and completed writes.
-   Resume known runs before creating new ones. Qyrion supports create
-   idempotency keys; use a stable key per logical attempt. Confirm syntax with
-   CLI help. For other writes, use documented idempotency or reconcile by
+   returned using the private scoped record in `local-state.md`, next to the
+   selected credentials file. Keep detailed sanitized evidence/write-back
+   notes in the task's report when needed; the reusable record uses only its
+   allowed metadata, not raw source text or objectives.
+   Resume known runs before creating new ones. The CLI does not expose a
+   general caller-supplied create-idempotency flag; reconcile ambiguous
+   creates through recorded IDs and session listing before retrying. For
+   other writes, use documented idempotency or reconcile by
    reading before retrying an uncertain result.
 5. **Verify.** Await terminal outcomes with finite waits. Distinguish failed,
    blocked, timed out, cancelled, and inconclusive. Check requirements against
@@ -45,8 +52,9 @@ Scope: multi-system workflows using Qyrus and an agent's existing connectors.
    evidence pack locally; label the loop's write-back stage pending.
 7. **Clean up.** Cancel only owned nonterminal sessions, retain cleanup
    outcomes and resource handles, and explain any unresolved allocation.
-   Record reusable insights/test changes when requested; do not silently
-   create organizational policies or persistent memory.
+   Record reusable scoped IDs/outcomes per `local-state.md`, with a safe
+   pointer in host memory only when supported and permitted. Do not silently
+   create organizational policies or copy credentials/source payloads.
 
 A concise evidence record contains:
 

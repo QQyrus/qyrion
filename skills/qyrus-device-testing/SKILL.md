@@ -1,147 +1,105 @@
 ---
 name: qyrus-device-testing
-description: Tests the app being built on real cloud devices end to end - discovers user journeys from the codebase, proposes ranked test scenarios, uploads the app build, and drives Qyrus AI device sessions through the qyrion CLI to a verdict-and-evidence report. Use for requests like "test this app/build on a real device", "run a smoke or E2E pass on device", or "verify this app build". Do not use for web browser testing, for selecting tests from a specific git diff or PR (use qyrus-change-impact), or for plain qyrion command help (use qyrion-cli).
+description: Run or create mobile app tests on real cloud devices from a build, ticket, story, bug, or objective through Qyrion Mobile Agent sessions. Use for Android/iOS smoke, E2E validation, new reusable mobile coverage, or test-this-app requests even without a Qyrion mention. Use qyrus-web-testing for websites, qyrus-change-impact for a specific diff, and qyrion-cli for command help.
 ---
 
-<!-- Distilled from: shared/cli-contract.md, shared/event-contract.md, shared/safety-policy.md, apps/qyrion/docs/getting-started.md. -->
+<!-- Distilled from: shared/execution-routing.md, shared/cli-contract.md, shared/event-contract.md, shared/safety-policy.md, shared/parallel-orchestration.md, apps/qyrion/src/qyrion/cli/main.py. -->
 
 # Test the app on real devices
 
-Turn "test my app" into ranked scenarios, then into Qyrion device sessions,
-then into a verdict-and-evidence report. This skill owns scenario quality;
-the CLI mechanics live in the embedded references.
+**Use Qyrion mobile sessions for mobile objectives.** Reuse ticket/build and
+permitted test-account details already provided. Do not substitute local
+browser/CUA testing or turn a new-test request into a saved-script rerun.
+Follow `references/execution-routing.md`: ask about new coverage versus reuse
+only when genuinely unclear, in plain language without tool-selection menus.
 
-Read before starting:
+Read the CLI, event and safety contracts before execution. Read
+`references/parallel-orchestration.md` for multiple objectives and
+`references/scenario-format.md` for scenario details. Consult other
+references only when needed; do not read every reference up front.
 
-- `references/cli-contract.md` — CLI resolution, handshake, command catalog
-- `references/event-contract.md` — JSONL frames, park semantics, artifacts
-- `references/safety-policy.md` — binding rules (production, secrets, cleanup)
-- `references/parallel-orchestration.md` — multi-scenario fan-out
-- `references/scenario-format.md` — required scenario fields and ranking
-- `references/qyrion-yml.md` — optional repo mapping file
+## Prepare the target
 
-## Phase A — Preflight
+1. Resolve/install missing CLI prerequisites via `references/prerequisites.md`;
+   use `qyrion capabilities --json`. Offer incompatible-version updates via
+   `references/update-checks.md`, install only after acceptance, then recheck.
+2. Reuse shared setup and confirmed team via `references/credentials.md`;
+   verify helper-wrapped `qyrion sessions list --json`. Ask only when multiple
+   teams have no selection. Wrap ordinary calls with the installed credential
+   helper; use `qyrus_private.py` for credential-bearing inputs/history per
+   `references/private-execution.md`.
+3. Read optional `qyrion.yml` for project, device and journey hints; use
+   `references/qyrion-yml.md`. Account labels are not resolved credentials.
+4. Use the user's `.apk`/`.aab`/`.ipa`, an explicitly selected uploaded app,
+   or a verified relevant build output. Ask only if no suitable build is
+   known; never guess a binary or silently switch environments.
+5. Apply the safety policy for target environment, authorized test logins,
+   stop-before points and resource limits.
 
-1. CLI handshake: `qyrion capabilities --json` (resolution order and failure
-   guidance in the CLI contract). Abort with install/upgrade instructions if
-   missing or too old.
-2. Auth + team: use `references/credentials.md` for shared setup and
-   guide-first MCP team discovery. Confirm the intended team UUID, then verify
-   Qyrion access with helper-wrapped `qyrion sessions list --json`. Multiple
-   teams without a selection require user choice. Do not gate this workflow
-   on `qyrion auth teams` or print credential values.
-3. Project mapping: if the repo has a `qyrion.yml`, parse it for app
-   name/platform, preferred device pool, path→journey hints, and test-account
-   aliases (see `references/qyrion-yml.md`). It is optional — proceed without
-   it, but say so.
-4. Locate the app build: an `.apk`/`.aab`/`.ipa` the user names, or the most
-   recent build output in the repo. If there is no build, stop and ask —
-   never guess a binary.
-5. Confirm the target is not production (safety policy). Default to
-   staging/test configuration.
+## Define the scenarios
 
-## Phase B — Discovery: propose scenarios from the codebase
+Start from the requested objective and its assertions. For broad discovery,
+inspect relevant routes/screens, accessible labels, API clients, flags,
+existing tests, requirements, and failure/empty/loading states. Rank by
+business criticality, changed/untested surface, regression likelihood,
+observability and setup risk; use `references/scenario-format.md`.
 
-Inspect only relevant evidence; do not infer journeys from filenames alone:
+A known saved-test project can help dedup the save decision or satisfy a
+reuse request. It does not replace an explicit fresh-session request. Do not
+scan every MCP project before starting a known objective.
 
-- route/navigation definitions and screen registries
-- screens/components and their accessible labels and visible copy
-- API clients and feature flags that change UI behavior
-- existing tests (unit/E2E) and fixtures/test accounts
-- product docs and acceptance criteria when present
-- error, empty, and loading states
-- `qyrion.yml` path→journey hints
+State the bounded scenarios and device choice, then proceed within existing
+user authorization. Ask only for missing material scope or a larger test
+matrix. Plan-only requests stop before execution. Independent objectives may
+run concurrently once account/state dependencies are resolved; dependent
+journeys stay sequential or in one session.
 
-Produce ranked scenarios. Rank by, in order:
+## Execute
 
-1. user/business criticality
-2. changed or untested surface
-3. regression likelihood
-4. observability and determinism
-5. setup cost and destructive risk
-
-Every scenario carries: title, intent, preconditions/data, user-intent steps,
-assertions, evidence to capture, confidence, and the source files that
-justify it (full field spec in `references/scenario-format.md`).
-
-Deduplicate against saved tests when a project id is known:
-`qyrion tests list --project <id> --json` → classify each proposal as
-`covered`, `extend_existing`, or `new`.
-
-## Phase C — Confirm execution scope
-
-Present the ranked scenario table (title, intent, device, estimated sessions,
-risk). Proceed within the user-authorized test scope and budget; ask only
-when the proposed runs materially exceed it or necessary scope is missing.
-A request to execute a bounded test permits that execution. Device runs
-consume real device time; avoid an unrequested broad matrix.
-
-In plan-only requests, stop here and output the plan.
-
-## Phase D — App upload (dedup-aware)
+Upload a local build when needed:
 
 ```bash
 qyrion apps upload ./app-release.apk --platform android \
   --name "<app-name>" --skip-if-uploaded --json
 ```
 
-`--skip-if-uploaded` computes the build's sha256 and reuses an existing
-identical upload instead of re-uploading. Capture the returned app id. If the
-flag is unavailable (old CLI), fall back to matching `qyrion apps list
---json` by name/version and tell the user which build you matched.
+Capture its app ID. `--skip-if-uploaded` deduplicates identical content; on
+older CLI support, verify the intended build from `apps list` rather than
+claiming a name/version match proves identical content. Select the requested
+or suitable available device with `qyrion devices list --platform <p> --json`.
 
-Pick the device from `qyrion.yml`'s preferred pool, the user's request, or
-`qyrion devices list --platform <p> --json` (choose one sensible default,
-don't fan out across devices without approval).
-
-## Phase E — Execution: one session per scenario
-
-One-shot scenarios (single objective, pass/fail): use ci mode —
+For one objective:
 
 ```bash
-qyrion run --message-file ./scenario-01.md \
-  --device-ref <device-ref> --app <app-id> --mode ci --timeout 1800 --jsonl
+qyrion run --message-file ./scenario-01.md --platform mobile \
+  --device-ref <ref> --app <app-id> --mode ci --timeout 1800 --jsonl
 ```
 
-Multi-step scenarios: use the live-mode turn loop, one session per scenario:
+For an ongoing journey, use `sessions create ... --mode live --jsonl`, then
+bounded `sessions stream <run_id> --until input-required --max-seconds 900
+--jsonl` and `sessions send <run_id> --message-file ./next.md --follow --jsonl`.
+Apply `references/private-execution.md` to credential-bearing input, all
+subsequent history output, and temporary CLI logs; stdin alone is insufficient.
+Objectives describe user intent and assertions, not invented account aliases.
 
-1. `qyrion sessions create --message-file ./step-1.md --device-ref <ref>
-   --app <app-id> --mode live --jsonl` → capture `run_id` from the first
-   snapshot frame.
-2. `qyrion sessions stream <run_id> --jsonl --until input-required
-   --max-seconds 900`.
-3. Inspect the segment's events; download the latest `observe_raw` screenshot
-   (`sessions artifacts` → `sessions download`) and look at it — screenshots
-   are the ground truth for assertions.
-4. Decide: send the next objective (`sessions send <run_id> --message-file
-   ./step-N.md --follow --jsonl`), answer a `clarification_requested`
-   question (from repo evidence only; escalate secrets/consent per the safety
-   policy), or finish.
-5. When the scenario is done: let it complete, then `sessions result
-   <run_id> --wait --json`; or `sessions cancel <run_id>` if aborting.
+Capture each run ID immediately. Inspect questions and artifacts, answer
+known facts via `answer-qyrion-agent-questions`, and obtain terminal results.
+Multiple independent scenarios may use several CLI processes from one agent;
+subagents are optional. Follow the parallel reference for concurrency caps,
+monitoring all parked runs, and mandatory cleanup.
 
-Multiple scenarios: fan out per `references/parallel-orchestration.md` — one
-subagent per session, 2–3 concurrent max, `PENDING_CONCURRENCY` means wait,
-unique run names, and a mandatory final cancel-sweep.
+## Save and report
 
-Objectives sent to the device agent must be user-intent level ("log in as
-alias smoke-user-1 and verify the dashboard shows the Projects list"), carry
-the scenario's assertions, and embed the safety limits (stop-before points,
-no destructive actions). Never include credentials — aliases only.
+When saving was requested, inspect captured steps/login inputs and the live
+save contract, then use supported `sessions save-test <run_id> --project <id>
+--test-name <name> --json`. Resolve destination metadata at save time if
+unknown. Saving was already authorized by "create and save"; avoid asking
+again. Do not claim login values are redacted or that an account alias is a
+secure reference. Read the asset back; report save and verified rerun separately.
 
-## Phase F — Evidence report
-
-For each scenario report:
-
-- verdict: `passed` / `failed` / `blocked` / `inconclusive` / `cancelled` —
-  passed requires the run completed AND the assertions are supported by
-  evidence, not merely exit 0
-- run_id and final status
-- evidence: downloaded artifact file paths + event `sequence_no` citations
-- failure triage when applicable: app bug vs. wrong scenario assumption vs.
-  environment/data issue vs. flake
-- open risks and human decisions needed
-
-End with the leftover-session sweep (`sessions list --json` → cancel anything
-you started that is still `running`/`waiting_user_input`) and state its
-result in the report.
+Report each scenario's verdict, run ID, terminal status, assertion evidence,
+local artifact paths/event sequence numbers, failure category, and unresolved
+questions. A pass requires evidence, not just exit 0. Record scoped handles
+and outcomes via `references/local-state.md`; no raw credentials or prompts.
+Finish with a `sessions list --json` sweep and cancel only task-owned sessions
+still active, including pending/running/parked sessions; report failed cleanup.

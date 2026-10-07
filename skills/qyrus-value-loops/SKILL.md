@@ -5,12 +5,20 @@ description: Close a Qyrus quality loop from a connected work item, requirement,
 
 # Close the loop with evidence
 
-<!-- Distilled from: supplied qyrus_autonomous_value_loops_turbo HTML (2026-09-29), existing plugin skills, Qyrion source contracts, and qyrusai 1.0.9. Roadmap labels are not live capability guarantees. -->
+<!-- Distilled from: shared/execution-routing.md, shared/local-state.md, supplied qyrus_autonomous_value_loops_turbo HTML (2026-09-29), existing plugin skills, Qyrion source contracts, and qyrusai 1.0.9. Roadmap labels are not live capability guarantees. -->
 
 This skill composes the agent's available tools around an outcome. It does
 not add a background worker, scheduler, work-management connector, telemetry
-system, deployment authority, or permanent memory. Installation is not an
+system, deployment authority, or an always-running agent. Installation is not an
 instruction to act on every visible issue.
+
+Apply `references/execution-routing.md` before choosing tools. Execute new
+web/mobile objectives with Qyrion, using the source ticket's known target
+and permitted login details. Do not open a host browser or replace a new
+test with an MCP saved-test rerun. Reuse explicit saved-test intent; ask a
+single plain-language new-versus-existing question only if genuinely unclear.
+Users need not know the underlying tool names. Split independent objectives
+per `references/parallel-orchestration.md`; subagents are optional.
 
 Read `references/loop-recipes.md` for a matching example; read
 `references/loop-contract.md` for execution, resumption, and write-back.
@@ -56,6 +64,12 @@ outcomes, explicit failures or inconclusive assertions, created/updated
 asset IDs, source write-back status, and cleanup status. Generation, a saved
 test, a queued run, or an issue transition alone cannot prove the objective.
 Do not silently turn a failing check into a pass by weakening its assertion.
+
+Retain scoped handles/outcomes next to the selected credentials file per
+`references/local-state.md`, with a safe host-memory pointer when supported.
+Do not copy secrets or raw ticket/objective text. Revalidate assets on reuse.
+At task entry apply `references/update-checks.md` for the throttled CLI
+release check; offer available updates and install only after acceptance.
 
 Recurring monitoring is separate: use an available host scheduler only when
 the user requests recurring work. Specify the scope, credentials path,

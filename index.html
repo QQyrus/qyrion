@@ -309,7 +309,7 @@
             <a class="text-link" href="#install">How setup works ↓</a>
           </div>
           <p id="copy-status" class="copy-status" role="status" aria-live="polite"></p>
-          <div class="chip-row" data-reveal style="--i:4" aria-label="Supported coding agents"><span class="meta">Works in</span><span class="chip">Codex</span><span class="chip">Claude Code</span><span class="chip">Cursor</span></div>
+          <div class="chip-row" data-reveal style="--i:4" aria-label="Coding-agent integrations"><span class="meta">Agent integrations</span><span class="chip">Codex</span><span class="chip">Claude Code</span><span class="chip">Antigravity</span><span class="chip">Cursor</span></div>
           <pre id="setup-prompt" class="sr-only">Set up QyrusAI Assure from https://github.com/QQyrus/qyrion.</pre>
         </div>
         <div data-reveal style="--i:3">
@@ -406,6 +406,7 @@
 claude plugin install qyrusai-assure@qyrusai-assure --scope user</pre>
             <p>Then say “Set up QyrusAI Assure.” If Claude requests it, run <code>/reload-plugins</code> or start a new session to load the skills and MCP server.</p>
             <p>For <strong>Codex</strong> and <strong>Cursor</strong>, follow the <a class="text-link" href="https://github.com/QQyrus/qyrion#install--refresh">host-specific installation instructions</a>. The plugin identifier is <code>qyrusai-assure</code>.</p>
+            <p><strong>Antigravity</strong> uses the same skills with its native plugin format. Follow the <a class="text-link" href="https://github.com/QQyrus/qyrion#antigravity">Antigravity setup instructions</a>; setup registers the Qyrus MCP connection using your private key file. Verify loaded skills and MCP access in your host. Work-tracker connectors authenticate separately.</p>
           </div>
         </details>
       </div>

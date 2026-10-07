@@ -21,8 +21,8 @@ devices:
     - device_ref: dfdev_galaxy24  # fallback
 
 accounts:
-  # ALIASES ONLY. The device platform resolves aliases to real credentials
-  # server-side. Passwords/OTPs/keys never belong in this file.
+  # Labels only, not server-resolved credentials. Supply authorized login
+  # details separately per safety-policy.md. No passwords/OTPs/keys here.
   - alias: smoke-user-1
     purpose: default logged-in journeys
   - alias: fresh-user
@@ -43,8 +43,9 @@ journeys:
 ## Rules
 
 - **Never secrets.** Account entries are aliases plus purpose only. If a
-  credential-looking value appears in this file, refuse to use it and tell
-  the user to rotate it.
+  credential-looking value appears in this file, do not reproduce or persist
+  it; flag the exposure and use the permitted private-input flow instead.
+  Alias names do not establish that login is configured or supported.
 - Values are hints, not law: verify `build_output` and `project_id` against
   reality (`qyrion apps list --json`, `qyrion tests list --json`) before
   relying on them.
