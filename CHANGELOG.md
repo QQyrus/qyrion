@@ -1,5 +1,31 @@
 # Changelog
 
+## 0.3.7 — 2026-10-14
+
+- Host manifest versions (Claude, Codex, Cursor) are stamped from the
+  `qyrion/v<version>` release when the public mirror publishes; the
+  committed manifests move to 0.3.7 as the baseline.
+
+## CLI workflow guidance — 2026-10-09
+
+- Document session names and aliases, paginated project/test discovery,
+  platform-specific reruns, new run IDs and submission-versus-pass semantics.
+- Distinguish Qyrion MCP from Aegis and backend creator attribution from
+  target-app login credentials; check installed/deployed support before use.
+
+## Unreleased — 2026-10-09
+
+- Clarify authorized target-login handoff without blanket password refusal;
+  exclude unrelated SDK Memory accounts and scope encryption claims to evidence.
+- Require complete paginated execution export, source-to-saved-step mapping,
+  and read-back; distinguish partial conversion from a verified runnable test.
+- Resolve one project/module per work-item scope before parallel saves.
+
+## Unreleased — 2026-10-07
+
+- Make private-input test fixtures portable on Windows with explicit UTF-8,
+  a native fake-CLI launcher, and POSIX-only permission assertions.
+
 ## 0.3.4 — 2026-10-06
 
 - Make Qyrion the default executor for new web/mobile coverage; ask a plain

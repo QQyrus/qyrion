@@ -3,7 +3,7 @@ name: answer-qyrion-agent-questions
 description: Answer clarification_requested or waiting_user_input questions from a Qyrion web/mobile session using known task, ticket and repo facts. Reuse permitted test-account details already supplied for the authorized task; ask only for missing login inputs, OTP/MFA or human-required interaction, new destructive consent, or unresolved business decisions. Never guess or bypass host policies.
 ---
 
-<!-- Distilled from: shared/execution-routing.md, shared/local-state.md, shared/cli-contract.md, shared/event-contract.md, shared/safety-policy.md, apps/qyrion/docs/getting-started.md. -->
+<!-- Distilled from: shared/private-execution.md, shared/test-preservation.md, shared/execution-routing.md, shared/local-state.md, shared/cli-contract.md, shared/event-contract.md, shared/safety-policy.md, apps/qyrion/docs/getting-started.md. -->
 
 # Answer questions from a Qyrion session
 
@@ -21,6 +21,13 @@ Read before answering anything:
 - `references/cli-contract.md` — send/question/stream commands
 - `references/event-contract.md` — clarification events, park semantics
 - `references/safety-policy.md` — binding rules (secrets, consent, cleanup)
+
+Use the scenario's authorized test username/password in the private objective
+or session answer per `references/private-execution.md`. Do not omit the
+password or demand manual login merely because it is a password; actual host
+restrictions still apply. Discard unrelated credentials from SDK Memory.
+For any requested save/export, read `references/test-preservation.md`: one
+resolved project/module, all step pages, full coverage mapping and read-back.
 
 ## Detect the question
 

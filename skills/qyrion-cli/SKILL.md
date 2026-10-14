@@ -3,7 +3,7 @@ name: qyrion-cli
 description: Starts, monitors, replies to, downloads artifacts from, and cancels Qyrus AI mobile and web sessions through the qyrion CLI. Use for explicit qyrion commands, direct session operations (start/stream/send/question/result/cancel), artifact/screenshot download, app upload, device or test listing, and troubleshooting qyrion CLI errors or exit codes. Do not use for deciding what to test (use qyrus-device-testing) or for git-diff test impact analysis (use qyrus-change-impact).
 ---
 
-<!-- Distilled from: shared/execution-routing.md, shared/local-state.md, shared/prerequisites.md, shared/cli-contract.md, shared/event-contract.md, shared/safety-policy.md, apps/qyrion/docs/getting-started.md. -->
+<!-- Distilled from: shared/session-workflows.md, shared/private-execution.md, shared/test-preservation.md, shared/execution-routing.md, shared/local-state.md, shared/prerequisites.md, shared/cli-contract.md, shared/event-contract.md, shared/safety-policy.md, apps/qyrion/docs/getting-started.md. -->
 
 # Qyrion CLI operations
 
@@ -27,6 +27,16 @@ Read before the first call in a task:
 - `references/cli-contract.md` — resolution order, full command catalog, flags
 - `references/event-contract.md` — JSONL frames, statuses, park semantics
 - `references/safety-policy.md` — binding safety rules
+
+Use the scenario's authorized test username/password in the private objective
+or session answer per `references/private-execution.md`. Do not omit the
+password or demand manual login merely because it is a password; actual host
+restrictions still apply. Discard unrelated credentials from SDK Memory.
+Use `references/session-workflows.md` for meaningful session names, scoped
+project/test discovery, and platform-correct saved-test reruns. Preserve explicit
+user names; otherwise use a short scenario label for multi-scenario runs.
+For any requested save/export, read `references/test-preservation.md`: one
+resolved project/module, all step pages, full coverage mapping and read-back.
 
 ## Preflight (mandatory, in order)
 

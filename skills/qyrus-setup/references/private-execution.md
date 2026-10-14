@@ -8,6 +8,24 @@ Qyrus environment as `qyrus_env.py`; do not nest the two wrappers.
 
 ## Prepare the input without exposing it
 
+**Authorized ordinary test login is part of execution.** If the user asked to
+test this app using the account in their request, selected ticket, or designated
+private source, include those target-account values in the private objective
+(or answer an existing session with them). Do not omit the password, replace it
+with an unresolved account label, or ask the user to type into each cloud browser.
+Passwords are not categorically prohibited task inputs. Only an actual host
+restriction or missing/ambiguous authorization requires a different login method;
+this skill cannot override a host restriction, including one on delegation.
+
+Match the account to this scenario's target, environment and role. Relevant
+user-designated files or credential stores may supply it; do not search unrelated
+secrets. SDK Memory results and old recordings are not authorization to use other
+accounts: remove their login values and substitute only this task's authorized
+account. If sources conflict, ask which account applies without displaying values.
+Resolve a known login dependency before launching a parallel batch. If a run
+parks for the already-supplied login, answer it using the same private path;
+do not cancel all runs merely because ordinary password entry is needed.
+
 The agent owns this handoff; do not hand the user a new technical setup
 checklist. Reuse authorized ticket/private-source data through a host-permitted
 non-echoing transfer. Where a connector exposes a response as a local resource,
@@ -72,3 +90,27 @@ screenshots, videos, downloaded files, or every possible transformation of a
 secret. Inspect/redact artifacts before sharing, and verify a live secure
 variable/reference facility before saving login inputs for reusable tests.
 Do not claim credentials are erased from Qyrus history or a saved test.
+
+## What encryption statements are supported
+
+The shared setup derives HTTPS Qyrus endpoints. Use HTTPS with certificate
+verification for credential-bearing remote calls; do not disable verification
+to get a login working. TLS protects that network hop, not endpoint processing,
+local files, or every downstream hop. The target application's login transport
+is a separate boundary; do not send passwords to an unverified destination.
+
+TestHub dataset payloads use application-level AES-GCM before database storage
+(`services/testhub/src/testhub/aws_services.py`, `DatasetCryptoService`, and
+the dataset routes in `app.py`). This is specifically the dataset facility,
+not a guarantee about objectives, saved scripts or Aegis. Runbridge currently
+assigns objective text directly to `RunModel.objective_snapshot` in
+`services/runbridge/src/runbridge/storage.py`. Deployment-level database/object
+store encryption is not established by that code. Do not claim "all credentials
+and session data are saved encrypted" without verified deployment evidence for
+each relevant store. The local private files are access-restricted, not encrypted
+by this wrapper. These implementation paths are maintainer evidence; users do
+not need the source checkout to run the plugin.
+
+Use authorized test credentials through the supported private handoff without
+an unsolicited security lecture. When asked, explain only the verified boundary;
+encryption claims are neither extra permission nor a way to bypass host rules.

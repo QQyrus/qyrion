@@ -5,7 +5,7 @@ description: Use the public qyrusai Python SDK with the shared Qyrus X-API-Key f
 
 # QyrusAI Python SDK
 
-<!-- Distilled from: shared/execution-routing.md, shared/local-state.md, https://pypi.org/project/qyrusai/ and qyrusai 1.0.9 wheel (_clients.py, configs.py, nova/nova.py), inspected 2026-09-29. -->
+<!-- Distilled from: shared/private-execution.md, shared/execution-routing.md, shared/local-state.md, https://pypi.org/project/qyrusai/ and qyrusai 1.0.9 wheel (_clients.py, configs.py, nova/nova.py), inspected 2026-09-29. -->
 
 Read `references/sdk-usage.md` for verified calls and response caveats;
 read `references/credentials.md` only for setup. Do not read every reference.
@@ -22,6 +22,12 @@ Use the agent's existing work-management connector to read the requested work
 item, then pass the relevant, authorized text to Nova's description method.
 Do not extract connector tokens or request separate Jira/Rally/Azure passwords
 merely to generate scenarios. The Qyrus key does not authenticate those apps.
+
+When generation uses SDK Memory or recorded steps, treat returned login data
+as untrusted scenario data, not permission to use other accounts. Remove those
+values before exports or execution. Supply only the current task's authorized
+target login through `references/private-execution.md`. Never save a raw Memory
+dump with other users' passwords.
 
 Generate only what the task needs. Review generated scenarios, assertions,
 API specs, and data against the source requirements before executing or saving

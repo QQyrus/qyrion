@@ -3,7 +3,7 @@ name: qyrus-device-testing
 description: Run or create mobile app tests on real cloud devices from a build, ticket, story, bug, or objective through Qyrion Mobile Agent sessions. Use for Android/iOS smoke, E2E validation, new reusable mobile coverage, or test-this-app requests even without a Qyrion mention. Use qyrus-web-testing for websites, qyrus-change-impact for a specific diff, and qyrion-cli for command help.
 ---
 
-<!-- Distilled from: shared/execution-routing.md, shared/cli-contract.md, shared/event-contract.md, shared/safety-policy.md, shared/parallel-orchestration.md, apps/qyrion/src/qyrion/cli/main.py. -->
+<!-- Distilled from: shared/session-workflows.md, shared/private-execution.md, shared/test-preservation.md, shared/execution-routing.md, shared/cli-contract.md, shared/event-contract.md, shared/safety-policy.md, shared/parallel-orchestration.md, apps/qyrion/src/qyrion/cli/main.py. -->
 
 # Test the app on real devices
 
@@ -17,6 +17,16 @@ Read the CLI, event and safety contracts before execution. Read
 `references/parallel-orchestration.md` for multiple objectives and
 `references/scenario-format.md` for scenario details. Consult other
 references only when needed; do not read every reference up front.
+
+Use the scenario's authorized test username/password in the private objective
+or session answer per `references/private-execution.md`. Do not omit the
+password or demand manual login merely because it is a password; actual host
+restrictions still apply. Discard unrelated credentials from SDK Memory.
+Use `references/session-workflows.md` for meaningful session names, scoped
+project/test discovery, and platform-correct saved-test reruns. Preserve explicit
+user names; otherwise use a short scenario label for multi-scenario runs.
+For any requested save/export, read `references/test-preservation.md`: one
+resolved project/module, all step pages, full coverage mapping and read-back.
 
 ## Prepare the target
 

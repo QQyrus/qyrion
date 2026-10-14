@@ -5,7 +5,7 @@ description: Use Qyrus Aegis MCP to discover teams, find/reuse/update existing t
 
 # Qyrus Aegis MCP
 
-<!-- Distilled from: shared/execution-routing.md, shared/local-state.md, user-supplied AGENTS (2).md (Qyrus Aegis contract, 2026-09-29); live qyrus_guide_get remains authoritative. -->
+<!-- Distilled from: shared/test-preservation.md, shared/execution-routing.md, shared/local-state.md, user-supplied AGENTS (2).md (Qyrus Aegis contract, 2026-09-29); live qyrus_guide_get remains authoritative. -->
 
 Aegis exposes Qyrus web automation, API testing, and test orchestration.
 Discover available tools; host prefixes may precede the `qyrus_*` names.
@@ -36,6 +36,14 @@ required fields, step validation, execution lifecycle, pagination, and error
 recovery. Resolve every identifier with list/search tools. Exhaust applicable
 pages before concluding an asset or duplicate is absent. SDK, Qyrion, Aegis,
 and work-management IDs are not interchangeable.
+
+For Qyrion CLI project/test discovery or saved-test reruns, use
+`references/session-workflows.md`; Qyrion MCP tool names are not Aegis tools.
+
+For run-to-script conversion, first read `references/test-preservation.md`.
+Use one resolved project/module for the work item, separate tests per scenario,
+and account for every recorded step. Retrieve/read back all pages; a short
+summary or create acknowledgement does not prove the full script was saved.
 
 For an update, resolve scope and inspect the existing asset first. For a new
 asset, resolve the save destination without replacing a requested fresh run.

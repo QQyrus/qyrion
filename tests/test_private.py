@@ -27,7 +27,7 @@ def inputs(tmp_path):
     redact_file = tmp_path / "values.json"
     redact_file.write_text(json.dumps(secrets))
     message_file = tmp_path / "objective.txt"
-    message_file.write_text("Sign in as " + secrets[1] + " with " + secrets[0])
+    message_file.write_text("Sign in as " + secrets[1] + " with " + secrets[0], encoding="utf-8")
     for path in (env_file, redact_file, message_file):
         path.chmod(0o600)
     cli = tmp_path / "fake cli"
@@ -36,7 +36,8 @@ def inputs(tmp_path):
         message = sys.stdin.read()
         secrets = json.loads(pathlib.Path(os.environ['TEST_REDACT_FILE']).read_text())
         logs = pathlib.Path(os.environ['QYRION_LOG_DIR'])
-        assert stat.S_IMODE(logs.stat().st_mode) == 0o700
+        if os.name == "posix":
+            assert stat.S_IMODE(logs.stat().st_mode) == 0o700
         (logs / 'execution.jsonl').write_text(message + '\\n' + secrets[0])
         pathlib.Path(os.environ['TEST_LOG_PATH']).write_text(str(logs))
         pathlib.Path(os.environ['TEST_LAUNCH_COUNT']).open('a').write('launch\\n')
@@ -59,6 +60,10 @@ def inputs(tmp_path):
         raise SystemExit(int(os.environ.get('TEST_EXIT', '0')))
     '''))
     cli.chmod(0o700)
+    if os.name == "nt":
+        launcher = tmp_path / "fake cli.cmd"
+        launcher.write_text(f'@"{sys.executable}" "{cli}" %*\n', encoding="utf-8")
+        cli = launcher
     return {"secrets": secrets, "key": key, "env": env_file, "redact": redact_file,
             "message": message_file, "cli": cli, "root": tmp_path}
 
@@ -69,12 +74,12 @@ def invoke(inputs, command, *, message=False, extras=(), environment=None):
             "--redact-file", str(inputs["redact"]), *extras]
     if message:
         args += ["--message-file", str(inputs["message"])]
-    env = {**os.environ, "QYRION_CLI": str(inputs["cli"]),
+    env = {**os.environ, "PYTHONUTF8": "1", "QYRION_CLI": str(inputs["cli"]),
            "TEST_REDACT_FILE": str(inputs["redact"]),
            "TEST_LOG_PATH": str(inputs["root"] / "log-path"),
            "TEST_LAUNCH_COUNT": str(inputs["root"] / "launch-count"),
            **(environment or {})}
-    return subprocess.run([*args, "--", *command], env=env, capture_output=True, text=True,
+    return subprocess.run([*args, "--", *command], env=env, capture_output=True, text=True, encoding="utf-8",
                           timeout=15)
 
 

@@ -67,6 +67,11 @@ an empty result is not successful test coverage. Async methods need `await`.
 The SDK cannot establish work-management access by itself. Its direct Jira,
 Rally, and Azure methods accept separate credentials; prefer already-connected
 agent tools plus `from_description` to avoid copying those credentials.
+Memory-assisted generation can return old account inputs. Remove unrelated
+credentials before saving or forwarding generated steps; do not export a raw
+Memory payload or treat its login details as authorization. Use the current
+scenario's authorized account via `private-execution.md`. Keep generated
+proposals distinct from the complete executed-step export in `test-preservation.md`.
 SDK generation does not create durable Aegis assets: use the live MCP guide
 to translate, validate, save, run, and verify when requested.
 

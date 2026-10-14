@@ -19,6 +19,11 @@ reference does not override them or create permission for external actions.
   for the user to sign into the parent's browser. Keep values out of chat,
   shell arguments/history, reports, plaintext exports/shared scripts, fixtures,
   `qyrion.yml`, and local/host memory.
+- Use those authorized target credentials in the private objective or session
+  answer; ordinary test login is not categorically prohibited. Do not omit the
+  password and then ask the user to log into each cloud browser. Resolve only
+  actual host restrictions or missing/conflicting account scope. Never reuse
+  another account's password from SDK Memory or an unrelated recording.
 - Qyrion accepts objective text via `--message-file -`, but JSON output and
   execution logs can echo that text. For credential-bearing objectives and
   every subsequent command that can return their history, follow

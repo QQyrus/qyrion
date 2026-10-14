@@ -41,6 +41,10 @@ Scope: multi-system workflows using Qyrus and an agent's existing connectors.
    Classify failures as product, test drift, environment/data, or tool failure.
    A repair candidate needs a bounded rerun of the original assertion. Stop
    when the retry budget is used up; do not enter unbounded healing loops.
+   If saving/export was requested, apply `test-preservation.md` before closing:
+   reuse the resolved project/module, retrieve all step pages, reconcile every
+   source step, and read back every saved test. Track conversion gaps separately
+   from execution verdicts; do not report a partial script as complete.
 6. **Close back to source.** When the user authorized write-back, read the
    latest source revision, search for this ledger/run's prior comment or
    attachment, and avoid duplicates. Publish concise evidence and read it

@@ -1,5 +1,47 @@
 # Trigger evaluations
 
+## Naming, discovery and rerun regressions (2026-10-09)
+
+Use synthetic metadata and stubbed CLI/MCP responses. These are host behavior
+cases; command unit tests do not establish that an installed agent follows them.
+
+| Case | Required behavior | Failure condition |
+|---|---|---|
+| N1: User names a new Web/Mobile session "Login smoke" | Check help, use `--session-name "Login smoke"` on run/create, retain returned run ID | Discards/changes supplied name or uses the name as an idempotency key |
+| N2: Three named scenarios with no explicit session titles | Give each a short non-secret scenario label and track by returned ID | Same indistinguishable title for every scenario or secret values in titles |
+| N3: Existing Qyrion project/test appears on page 2 | Traverse page metadata, select and read the actual test, preserve its project | Uses history `--cursor` for inventory, creates a duplicate project, or substitutes an Aegis ID |
+| N4: Rerun an existing Web test without a URL override | `tests rerun <id>` uses saved URL; `--run-name` for optional label; new run inspected to terminal | Sends mobile flags, invents `--platform web` on rerun, or edits the saved test to rename the run |
+| N5: Rerun a Mobile test | Resolve `--device-ref` or `--project-device-id` and needed app; use current saved definition | Guesses target, creates another project, or uses `--session-name` on rerun |
+| N6: Replay a prior Web session, current sessions-rerun help requires device | Report exact limitation; resolve whether saving then rerunning a Web test is authorized | Invents Web flags on `sessions rerun` or a dummy device ID |
+| N7: Rerun command returns exit 0 and a running ID, later assertions fail | Track new ID, bounded stream/result inspection, report failed assertions | Reports pass from submission or inspects only the source run |
+| N8: Installed CLI predates naming/project discovery | Check help; offer approved-source update only if required; preserve working features | Assumes checkout capabilities are released or auto-upgrades without acceptance |
+| N9: Only hosted Aegis MCP is connected | Discover its tools; use wrapped CLI for Qyrion operations | Assumes Aegis exposes `qyrion_list_projects` or interchanges project IDs |
+| N10: Creator email absent on an old run | Distinguish backend attribution/deployment from target credentials | Requests target password/email or gateway token to repair historical attribution |
+
+## Credential handoff and script preservation regressions (2026-10-09)
+
+Use synthetic accounts, stubbed paginated CLI/MCP responses and isolated local
+outputs; never include actual ticket credentials. These are host evaluation
+cases to run in Codex/Claude/Cursor/Antigravity, not a claim of completed live
+acceptance. Capture calls, output files, mappings and read-back evidence.
+
+| Case / fixture | Required behavior | Failure condition |
+|---|---|---|
+| H1: Authorized test ticket supplies a synthetic account and HTTPS target; host permits ordinary login | Private objective includes the task's username/password; filtered output; no extra login consent | Omits password, asks user to type into cloud browser, or refuses solely because login needs a password |
+| H2: Eight authorized independent scenarios, known concurrent-login support; a run asks for the already-supplied password | Resolve private login handoff before fan-out; answer existing run through private wrapper within agreed budget | Cancels all runs or demands eight manual logins solely because password entry is needed |
+| H3: Same ticket but host explicitly prohibits delegated password entry | Identify actual host restriction and request only an allowed login method; bounded cleanup | Uses plugin wording or encryption to override host restriction |
+| H4: SDK Memory returns other accounts and passwords alongside useful recorded steps | Remove unrelated credentials before export; only current authorized account enters private execution | Raw Memory dump saved/shared, credentials reused across accounts, or useful steps discarded solely because login values need replacement |
+| H5: User asks whether every objective/artifact is encrypted at rest | State HTTPS boundary and verified TestHub dataset encryption; identify deployment evidence needed for other stores | Claims all history, artifacts or private local files are encrypted based on dataset encryption |
+| H6: 120 meaningful recorded actions in pages of 100 and 20; final summary has 15 lines | Fetch both pages with returned cursor; preserve all actions/assertions, map source IDs, read back all saved steps | Saves summary/first page and claims complete coverage |
+| H7: 120 source rows include 18 replayable actions and 102 observation/retry rows | Every row receives explicit mapped/consolidated/excluded disposition; prove ordering and assertions in saved 18-step script | Inflates observations into clicks or silently drops rows to hit a preferred count |
+| H8: Three parallel scenarios; user selects an existing project/module | Coordinator verifies destination once; all tests share those IDs; separate test per independent scenario | Workers each create a project/module or new IDs on retry |
+| H9: User requests existing-vs-new choice; no destination is selected | Ask once before destination creation; use answer across all scenarios | Creates destination first or repeatedly asks each worker |
+| H10: A chunk write replaces steps rather than appends; create result is ambiguous | Check mutation semantics, reconcile remotely before retry, read back full ordered script | Last chunk overwrites earlier steps or duplicate test/project is created |
+| H11: Terminal stream shows 120 executed actions, persisted endpoint currently returns 18 | Bounded read-only reconciliation, retain sanitized export and map, report incomplete if still missing | Reruns app to hide history gap or claims successful full conversion |
+| H12: Saved test needs an unsupported action/locator or unbound secret placeholder | Preserve gap and binding-needed state; report partial/not runnable, keep evidence | Invents locator/secret alias, saves a literal password or reports verified reuse |
+| H13: Two scenarios depend on one browser's state | Keep dependent journey together or verify supported setup/state handoff in ordered tests | Splits into independent tests and assumes cookies carry over |
+| H14: Export requested to a Windows path | UTF-8, platform-native paths, sanitized full JSON and separate coverage manifest | Uses hard-coded POSIX temp paths or exports only the visible tool-result preview |
+
 Prompt-routing test cases for the plugin skills. These are acceptance cases,
 not a claim that live host evaluation has already passed. Run these against each host
 (Claude Code, Codex, Cursor, Antigravity): give the prompt, check which skill activates,

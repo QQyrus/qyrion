@@ -67,6 +67,26 @@ input may remain in Qyrus session history; a local private file or stdin does
 not make it a secret-vault channel. Human-only authentication steps still
 follow the host's rules. See [credential handling](shared/safety-policy.md).
 
+For authorized ordinary test logins, the agent includes the supplied account
+in the private objective/session answer; it should not demand manual login in
+each cloud browser. Unrelated credentials found in SDK Memory are excluded.
+HTTPS protects the Qyrus network connection; verified TestHub dataset encryption
+does not establish encryption of every objective, transcript or saved artifact.
+See [the encryption boundaries](shared/private-execution.md#what-encryption-statements-are-supported).
+
+When saving executed coverage, the agent reuses **one project and module per
+work-item scope**, with separate tests for independent scenarios. It retrieves
+all step pages, maps every recorded step, and reads back the saved scripts.
+A 120-step recording reduced to 18 steps without an explained mapping is
+reported as incomplete. See [script preservation](shared/test-preservation.md).
+
+New Web/Mobile sessions support `--session-name` (`--run-name` alias),
+preserving your supplied name. Qyrion now exposes `projects list`; use
+`tests list --project <id>` and `tests rerun <id>` for saved coverage in that
+project. Reruns use `--run-name` and return a new run ID. See
+[session naming and reruns](shared/session-workflows.md) for platform options,
+pagination, and terminal verification. Check installed CLI support first.
+
 ## Remembering results and checking updates
 
 The agent records reusable session, test, suite, and project IDs in a private
@@ -430,9 +450,10 @@ the matching tag and CLI assets.
 The README's relative image and setup links therefore work in both locations.
 Only changes included in that release commit are mirrored; pushing a normal
 feature branch does not update the public package.
-The plugin version in the host manifests is independent of the CLI release
-version; bump it when changing the plugin so cached installations receive
-updates. A working editable CLI may report the source version instead of the
+The plugin version in the host manifests (`.claude-plugin`, `.codex-plugin`,
+`.cursor-plugin`) is stamped from the CLI release version when the mirror
+publishes, so every release reaches cached installations; the versions kept
+in this repository are only the baseline. A working editable CLI may report the source version instead of the
 release version; setup verifies capabilities and its installation source.
 
 Sources: [public qyrusai](https://pypi.org/project/qyrusai/),

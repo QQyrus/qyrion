@@ -40,6 +40,11 @@ provided and unambiguous. The shared `QYRION_APP_URL` is the Qyrus tenant;
 Follow `safety-policy.md` for target credentials and human authentication.
 Use `private-execution.md`'s input/output wrapper for credential-bearing
 calls and history; plain stdin does not prevent CLI echoes or local logs.
+Include the authorized target login in that private handoff; do not omit it
+or require the user to type into each remote session. SDK Memory and recorded
+steps may contain unrelated accounts: they are not a credential source unless
+the user has authorized that account for this scenario. Encryption statements
+must follow the verified boundaries in `private-execution.md`.
 The parent's inability to type a password in its own browser does not by
 itself establish a Qyrion limitation. Host restrictions still apply to
 delegated actions; never route around them.
@@ -63,7 +68,10 @@ Keep credentials out of plaintext exports, shared scripts and local records;
 resolve a required save-time credential decision without blocking the
 authorized exploratory run. Read the created asset back. "Create
 and save" already authorizes that bounded save; do not ask again.
-Save success is distinct from a successful rerun and verified reuse.
+Follow `test-preservation.md`: reuse one project/module per work-item scope,
+retrieve every page of steps, map every source step, and read back every saved
+step before claiming complete conversion. Save success is distinct from a
+successful rerun and verified reuse.
 
 ## Independent runs and continuity
 

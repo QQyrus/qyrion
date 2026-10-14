@@ -5,7 +5,7 @@ description: Close a Qyrus quality loop from a connected work item, requirement,
 
 # Close the loop with evidence
 
-<!-- Distilled from: shared/execution-routing.md, shared/local-state.md, supplied qyrus_autonomous_value_loops_turbo HTML (2026-09-29), existing plugin skills, Qyrion source contracts, and qyrusai 1.0.9. Roadmap labels are not live capability guarantees. -->
+<!-- Distilled from: shared/session-workflows.md, shared/private-execution.md, shared/test-preservation.md, shared/execution-routing.md, shared/local-state.md, supplied qyrus_autonomous_value_loops_turbo HTML (2026-09-29), existing plugin skills, Qyrion source contracts, and qyrusai 1.0.9. Roadmap labels are not live capability guarantees. -->
 
 This skill composes the agent's available tools around an outcome. It does
 not add a background worker, scheduler, work-management connector, telemetry
@@ -25,6 +25,16 @@ Read `references/loop-recipes.md` for a matching example; read
 Do not read every reference up front. Examples are starting points, not a
 closed list: adapt the same trigger → context → act → verify → evidence
 structure to new outcomes using capabilities actually available.
+
+Use the scenario's authorized test username/password in the private objective
+or session answer per `references/private-execution.md`. Do not omit the
+password or demand manual login merely because it is a password; actual host
+restrictions still apply. Discard unrelated credentials from SDK Memory.
+Use `references/session-workflows.md` for meaningful session names, scoped
+project/test discovery, and platform-correct saved-test reruns. Preserve explicit
+user names; otherwise use a short scenario label for multi-scenario runs.
+For any requested save/export, read `references/test-preservation.md`: one
+resolved project/module, all step pages, full coverage mapping and read-back.
 
 ## Establish the scope once
 

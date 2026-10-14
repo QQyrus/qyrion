@@ -27,6 +27,17 @@ budget. Do not expand into an unrequested device/browser matrix. More than
 three at once needs an agreed concurrency budget. When a session is
 `PENDING_CONCURRENCY`, stop submitting more and wait for capacity.
 
+Resolve the authorized login handoff before launching a batch; reuse supplied
+target credentials per `private-execution.md`, not accounts found in unrelated
+SDK Memory recordings. For saving, one coordinator resolves the project/module
+once and distributes those IDs to all owners. Each owner returns complete
+step exports and coverage mappings per `test-preservation.md`; no per-scenario
+project/module creation.
+
+Name each new session for its scenario using `--session-name` after checking
+installed help, preserving explicit user names and excluding secrets. Follow
+`session-workflows.md`; retain returned run IDs rather than using names as keys.
+
 ## One lifecycle owner per session
 
 The parent may own several independent sessions, or assign one to each

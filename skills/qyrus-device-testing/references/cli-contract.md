@@ -77,6 +77,11 @@ If a required flag is `false`, tell the user which feature the backend/CLI
 does not support yet and degrade (e.g. skip screenshot download) or stop,
 rather than calling the gated command and parsing its failure.
 
+For names, project/test discovery and saved-test/session reruns, read
+`session-workflows.md`. Check installed help: new sessions accept
+`--session-name`/`--run-name`; reruns accept `--run-name`. Keep submit success
+separate from terminal assertion success.
+
 ## Authentication, profiles, and first-run setup
 
 Qyrion requires the Qyrus application URL and API key, plus a selected team
@@ -264,6 +269,11 @@ qyrion sessions artifacts <run_id> --role observe_raw --json
 qyrion sessions download <run_id> <artifact_id> --output ./shot.png
 qyrion sessions presign <run_id> <artifact_id> --json   # avoid; prefer download
 ```
+
+Step extraction is paginated: `sessions steps` defaults to 100 rows. Follow
+returned `next_cursor` values with `--cursor <cursor> --limit 100`; check the
+installed help and response shape. A snapshot or first page is not the full
+recording. For complete run-to-test conversion, use `test-preservation.md`.
 
 Saved tests:
 

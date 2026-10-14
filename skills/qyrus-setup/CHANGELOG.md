@@ -1,5 +1,18 @@
 # Changelog
 
+## CLI workflow guidance — 2026-10-09
+
+- Document session names and aliases, paginated project/test discovery,
+  platform-specific reruns, new run IDs and submission-versus-pass semantics.
+- Distinguish Qyrion MCP from Aegis and backend creator attribution from
+  target-app login credentials; check installed/deployed support before use.
+
+## Unreleased — 2026-10-09
+
+- Refresh bundled credential guidance: use authorized target logins, exclude
+  unrelated Memory credentials, and state only verified encryption boundaries.
+- Bundle the complete-step preservation and shared project/module save contract.
+
 ## 0.3.4 — 2026-10-06
 
 - Add quiet four-hour release checks during plugin use, user acceptance
