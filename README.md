@@ -89,6 +89,16 @@ pagination, and terminal verification. Check installed CLI support first.
 
 ## Remembering results and checking updates
 
+Project `@VARIABLE_NAME` references, automatic saved-test Default capture,
+test-owned datasets and rerun preflight are described in
+[test-data workflows](shared/test-data-workflows.md). CLI and Qyrion MCP use
+the same typed client; private exports require an explicit request.
+After upgrading, refresh both the Qyrion installation and this plugin,
+restart/reconnect the Qyrion MCP server, and run the capability handshake.
+Regenerate embedded skill references with `bash scripts/build-packages.sh`
+from this plugin folder after editing shared guidance. This source update
+does not publish a release.
+
 The agent records reusable session, test, suite, and project IDs in a private
 `qyrusai-assure/` subfolder beside the selected credentials file. With the
 default setup this is `~/.config/qyrus/qyrusai-assure/`. Records are scoped

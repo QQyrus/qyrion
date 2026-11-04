@@ -64,3 +64,7 @@
 - Shared credentials use one private X-API-Key file and tenant-derived MCP
   endpoint. MCP team discovery needs no separate Authorization token.
 - See the plugin CHANGELOG for source conflicts and validation boundaries.
+
+## 2026-11-03
+
+- Refresh the shared CLI contract for the explicit initial-objective pattern bypass and required backend rollout.

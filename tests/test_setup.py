@@ -78,7 +78,8 @@ def test_configure_preserves_secrets_and_is_idempotent(private_env, monkeypatch,
     assert private_env.read_text() == original + "QYRUS_MCP_URL=https://stg-mcp.qyrus.com/mcp\n"
     assert qyrus_env.main() == 0
     assert private_env.read_text().count("QYRUS_MCP_URL=") == 1
-    assert private_env.stat().st_mode & 0o777 == 0o600
+    if os.name != "nt":
+        assert private_env.stat().st_mode & 0o777 == 0o600
     assert json.loads(qyrus_env.config_path().read_text()) == {"env_file": str(private_env)}
     assert "synthetic-only-key" not in str(capsys.readouterr())
     private_env.write_text(private_env.read_text().replace("QYRION_APP_URL=stg", "QYRION_APP_URL=app"))

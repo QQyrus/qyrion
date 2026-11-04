@@ -1,5 +1,35 @@
 # Changelog
 
+## Unreleased — 2026-11-03
+
+- Document the caller-requested initial-objective credential-pattern bypass, plaintext handling, and backend rollout order. Regenerate embedded CLI contracts; host manifest versions remain release-workflow owned.
+
+## 0.3.9 — 2026-10-23
+
+- Clarify browser pre-send consent versus CLI/MCP reference workflows, final value-free audit and encrypted Default capture. Regenerate all shared skill copies.
+
+- Document Text/Secret variable kinds, explicit Secret-to-Text confirmation,
+  typed dataset templates/exports, and the `variable_types` capability.
+- Clarify that saved-test UI reruns select test-owned datasets while CLI/MCP/API
+  retain project-variable sources and historical replay preserves its source.
+- Clarify Secret defaults for new variables and kind preservation on edits.
+- Regenerate distributed skill references. Refresh Qyrion and the plugin;
+  this source update does not publish a release.
+
+## 0.3.8 — 2026-10-22
+
+- Document advisory/unverified JSONL outcomes, separate evidence counts and why
+  completed/exit 0 does not establish a passed assertion. Regenerate skill copies.
+- Correct legacy `--dataset` guidance: preserve saved-test JSON variables and
+  distinguish the reference-based `--test-dataset` selection.
+
+- Add capability-gated CLI and Qyrion MCP workflows for project references,
+  variable management, automatic Default capture and test-owned datasets.
+- Document metadata-only discovery, explicit file export, revision-aware edits,
+  exact replacement confirmation and saved-source preferences.
+- Regenerate embedded skill references. Refresh Qyrion and the plugin and
+  reconnect MCP after installation; no release is published by this change.
+
 ## 0.3.7 — 2026-10-14
 
 - Host manifest versions (Claude, Codex, Cursor) are stamped from the

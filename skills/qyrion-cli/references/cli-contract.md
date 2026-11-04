@@ -204,6 +204,13 @@ hang until `--timeout` and exit `1` instead.
 
 ## Command surface
 
+Project references and test-owned dataset commands require the capability
+flags `project_references`, `project_variable_management`,
+`test_dataset_management`, and `rerun_test_data_preflight`. The matching
+Qyrion MCP discovery tool is `qyrion_capabilities`. Follow
+`test-data-workflows.md` for commands, schemas, revisions and confirmation;
+do not infer support from the plugin version alone.
+
 Setup and inventory:
 
 ```bash
@@ -315,3 +322,16 @@ the submitted message from being retained in Qyrus session history.
   `sessions send` message becomes the next objective. Use for multi-step
   agent-driven testing. Parked devices still consume device time — always
   cancel or finish sessions you started.
+
+## Explicit objective pattern opt-out (0.3.9)
+
+When the caller explicitly requests literal objective handling, `run` and
+`sessions create` accept `--skip-credential-pattern-matching`. This bypasses
+automatic credential classification and hiding for the initial objective,
+including its first runtime handoff; inline text may persist and appear in
+responses. Use explicit project `@VARIABLE` references for actual secrets.
+Project reference authorization, start-URL credential checks, and later-message
+parsing remain active. Never add this flag automatically or combine it with
+reviewed `message_inputs`. It requires matching Runbridge deployment; older
+strict backends reject the new field with 422. Verify installed command help
+before invoking it. Existing private-execution requirements still apply.

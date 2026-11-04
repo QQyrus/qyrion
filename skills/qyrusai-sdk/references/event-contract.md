@@ -76,6 +76,41 @@ Both are continued with the same `qyrion sessions send <run_id> ...` append.
 | `run_completed` / `run_failed` / `run_cancelled` / `run_timed_out` / `run_blocked` | Terminal transitions; a terminal `snapshot` follows. |
 | `usage` / `device_geometry_changed` / others | May appear; safe to ignore for control flow. |
 
+## Advisory replay checks
+
+A completed run and CLI exit 0 describe execution completion. They do not
+establish that every assertion passed. For each `tool_result`, inspect
+`payload.replay_status`, `payload.output.advisory`, and the verification
+details such as `passed`, `supported`, `unverifiable`, `hint`, and
+`reasoning`. If `replay_status == "unverified"` or `output.advisory == true`,
+report that check as **Unverified**, even when `is_error == false`.
+An advisory can stop repair without failing the run.
+
+For example, the following check remains unverified after a later
+`run_status: completed` or terminal completed snapshot and exit 0:
+
+```json
+{
+  "event": "update",
+  "type": "tool_result",
+  "payload": {
+    "is_error": false,
+    "replay_status": "unverified",
+    "output": {
+      "passed": false,
+      "advisory": true,
+      "supported": ["The confirmation is visible"],
+      "unverifiable": ["future delivery"],
+      "hint": "Future delivery cannot be verified from the current screen."
+    }
+  }
+}
+```
+
+Evidence reports must keep passed, failed and unverified counts separately,
+with the reasons for each unverified check. Do not promote advisory evidence
+to a pass from `is_error: false`, completed status or a zero exit code.
+
 ## Artifacts (screenshots and evidence)
 
 `tool_result.payload.artifact_refs` is a list of artifact handles:

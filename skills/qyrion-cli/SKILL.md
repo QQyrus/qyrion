@@ -7,6 +7,10 @@ description: Starts, monitors, replies to, downloads artifacts from, and cancels
 
 # Qyrion CLI operations
 
+For project variables, `@` references, Default capture, test-owned datasets,
+rerun preflight or replacement confirmation, read
+`references/test-data-workflows.md` and check its capability gates first.
+
 Direct session operations against the Qyrus device and browser cloud through the
 `qyrion` CLI. Use structured modes only (`--json` / `--jsonl`); never scrape
 human-formatted output.

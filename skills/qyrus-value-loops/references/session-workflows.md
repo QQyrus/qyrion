@@ -58,7 +58,7 @@ do not substitute IDs between them or invent Qyrion module flags.
 | Request | Command and boundary |
 |---|---|
 | Run the current saved test definition | `tests rerun <test-id>`; automatically uses that test's project; no `--project` flag needed |
-| Replay a prior completed session's recorded steps | `sessions rerun <source-run-id>`; current CLI requires `--device-ref`, with optional `--app`; it has no web `--platform`/`--start-url` options |
+| Replay a prior completed session's recorded steps | `sessions rerun <source-run-id>`; Web uses its saved URL; Mobile requires `--device-ref`, with optional `--app` |
 | Continue an existing live/parked session | `sessions send <run-id>`; a new objective in that session, not a rerun |
 | Fresh exploration/new coverage | `run` or `sessions create`; do not silently switch to replay |
 
@@ -85,11 +85,17 @@ worked, not that assertions passed. Prefer submission with `--json`, then bounde
 and terminal `sessions result`/step inspection. Handle questions and cleanup as
 for fresh sessions. `--stream --jsonl` is available on reruns, but does not by
 itself add a finite wait budget or turn exit 0 into a passing-test verdict.
+Apply `event-contract.md`'s advisory replay rules: count unverified checks and
+their reasons separately, including when the completed run returns exit 0.
 Both replay paths require curated replayable steps; missing steps or unsupported
 web session-replay options are concrete blockers, not permission to invent flags
 or silently create a different test/project. Reconcile before any retry.
 
 ## MCP and attribution
+
+For project references, automatic Default capture, dataset management,
+preflight and exact replacement confirmation, follow `test-data-workflows.md`.
+Gate these operations on the installed capabilities before use.
 
 When the separate Qyrion MCP server is connected, discover its live schemas:
 `qyrion_list_projects`, `qyrion_list_tests`, `qyrion_get_test`,
