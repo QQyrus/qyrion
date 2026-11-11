@@ -17,6 +17,33 @@ which Qyrus tool implements it.
 | Explicit Playwright/CUA/local-browser request | Honor that choice and host policies; do not substitute Qyrion |
 | Generate test ideas only, review read-only, or write unit tests | No cloud execution or saved-test mutation unless requested |
 
+## Qyrus product names
+
+People name Qyrus products, not tools; they never have to say "MCP".
+
+| The person says | It means | Served by |
+|---|---|---|
+| Web Testing (web automation, "my web tests") | Web Testing projects, modules, scripts and suites in a Qyrus team | Aegis MCP `qyrus_web_*` (`qyrus-mcp`) |
+| API Testing | API projects, suites and scripts | Aegis MCP `qyrus_api_*` |
+| Orchestration | Workflows across tests | Aegis MCP `qyrus_orchestration_*` |
+| TDM (test data) | Test data sources | Aegis MCP `qyrus_tdm_*` |
+| Mobility, or running/exploring a website | A real-device or browser session | Qyrion sessions |
+| A saved Qyrion test | A reusable Qyrion test in a Qyrion project | `qyrion sessions save-test` |
+
+"Save it to (my) Web Testing" means a Web Testing script in one of the
+person's teams, made through the MCP (`test-preservation.md`), never a
+Qyrion project named "Web Testing". When "projects", "tests" or "suites"
+could be Web Testing or API Testing and nothing says which, ask which
+product. A product the request names needs no question.
+
+Teams come from the MCP tool `qyrus_teams_get_by_api_key`
+(`credentials.md`, "Team discovery through MCP"). A team the request, the
+brief, notes or a remembered preference names is the team; one team is
+used without asking. When several fit and none is selected, ask which
+team; never read every team's lists instead of asking. Offer the product
+or team names (never their IDs) as choices with one recommended and why,
+where the host can show choices, and ask each kind of question once.
+
 A generic bounded request such as "test the login flow on this website" is
 an objective, so run it with Qyrion. Do not ask the user to select a browser
 tool. If the requested saved-test work genuinely leaves **new coverage vs
@@ -61,7 +88,8 @@ For a new objective, finding a similar saved script may inform assertions or
 avoid an accidental duplicate save; it does not replace the requested fresh
 web/mobile session. Do not begin with an exhaustive MCP project inventory.
 After verifying a new run, save it using supported Qyrion `sessions save-test`
-or the requested Aegis destination. Inspect captured login inputs and the live
+or the requested Aegis destination (a request to save to Web Testing names
+the Aegis destination). Inspect captured login inputs and the live
 save contract: do not assume `save-test` redacts them. Use supported runtime
 parameters/secret references only when verified; never invent alias support.
 Keep credentials out of plaintext exports, shared scripts and local records;

@@ -38,7 +38,8 @@ Three equivalent signals:
    `waiting_user_input` (question park).
 2. Pull: `qyrion sessions question <run_id> --json` returns the pending
    question when the run is parked (gated by the `session_questions`
-   capability).
+   capability); `waiting_for: "answer"` marks a question park, and
+   `last_message` repeats the question.
 3. Exit code: `qyrion run` in machine mode exits `5` with a structured
    `input_required` error whose `message` carries the question (gated by the
    `run_input_required_exit` capability). Capture the `run_id` from the
@@ -46,9 +47,13 @@ Three equivalent signals:
    names it.
 
 A park **without** a preceding `clarification_requested` is an
-objective-complete park, not a question — do not invent an answer; the next
-`sessions send` is a new objective (that flow belongs to the calling
-workflow, not this skill).
+objective-complete park, not a question: `sessions question` says
+`waiting_for: "next_instruction"`, `question: null`, and `last_message` is
+what the run found. Do not invent an answer; the next `sessions send` is the
+next instruction to the same run, or the run is ended when the work is done
+(that flow belongs to the calling workflow, `session-workflows.md` "Act on a
+parked session", not this skill). `waiting_for: "replay_input"` is a recorded
+test asking the person for a value (`sessions send --secure`).
 
 ## Classify before answering
 

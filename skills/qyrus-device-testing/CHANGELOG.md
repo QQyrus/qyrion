@@ -1,5 +1,10 @@
 # Changelog
 
+## Compact session output — 2026-10-22
+
+- Terminal results are read with `sessions result --wait --timeout 240 --json --compact` and steps with
+  `sessions steps --json --compact --limit 500`; plain `--json` is hundreds of KB on a long run.
+
 ## CLI workflow guidance — 2026-10-09
 
 - Document session names and aliases, paginated project/test discovery,

@@ -1,5 +1,12 @@
 # QyrusAI Assure
 
+Source version 0.4.0 prepares optional report-email controls across CLI, MCP
+and retained TUI surfaces. Fresh starts send no email unless recipients are
+selected; linked reruns inherit enabled saved-test settings and support an
+explicit opt-out. Deploy matching backends before releasing this client.
+See [the shared CLI contract](shared/cli-contract.md) for exact flags and
+48-hour PDF/HTML download-link behavior. This source version is unreleased.
+
 ![QyrusAI](assets/qyrusai-logo.png)
 
 [Installation guide and API-key video](https://qqyrus.github.io/qyrion/)
@@ -174,7 +181,7 @@ these steps during that request. A host reload does not require repeating setup.
 Setup prepares these dependencies:
 
 - `python3` and `uv` on the agent host's PATH. The MCP launcher uses Python 3.12+ and an
-  isolated, pinned `fastmcp==4.0.10` script dependency; first launch may download
+  isolated `fastmcp==4.0.10` (pinned) and `jsonschema` script dependencies; first launch may download
   that runtime/dependency. Prewarm it before reconnecting MCP if startup times out.
 - Qyrion CLI for device/browser runs, installed from the newest published
   [public release](https://github.com/QQyrus/qyrion/releases), including betas,
@@ -190,7 +197,9 @@ Setup prepares these dependencies:
 - An independently connected work-management app for reading/writing issues.
   The Qyrus key does not authenticate Jira, Linear, Azure DevOps, etc.
 
-After configuring the file, restart/reconnect MCP. Discover Qyrus tools and
+After configuring the file, restart/reconnect MCP. Confirm the host lists the
+Qyrus tools (six by default, see
+[Qyrus tools offered to the host](#qyrus-tools-offered-to-the-host)) and
 call `qyrus_guide_get` first, read its setup/identifier sections, then call
 `qyrus_teams_get_by_api_key` with `{}` to discover the available teams using
 the same API key. For Qyrion, check capabilities:
@@ -229,6 +238,37 @@ packages in the isolated environment:
 ```bash
 python3 scripts/qyrus_env.py sdk -- /absolute/path/generate.py
 ```
+
+## Qyrus tools offered to the host
+
+The hosted Qyrus MCP has 310 tools: far more than a model can choose among, and
+about 15K tokens of descriptions before any input schema. The bridge therefore
+lists **six** by default and discloses the rest on demand:
+
+| Tool | Use |
+|---|---|
+| `qyrus_guide_get`, `qyrus_account_capabilities_get`, `qyrus_teams_get_by_api_key` | Core tools, proxied unchanged and called by name |
+| `qyrus_tools` | Find a tool: no arguments lists the services; `service`, then `capability`, narrows to its tools (each marked `read`, `write` or `delete`); `query="pause schedule"` searches by words, at most 15 matches |
+| `qyrus_tool_schema` | `names` (1 to 5): each tool's full description and input schema, as the server gives them |
+| `qyrus_tool_call` | `name` and `arguments`: calls any Qyrus tool and returns its result unchanged. Arguments are checked against the tool's schema first; on a mismatch the schema and the error come back and Qyrus is not called |
+
+The catalogue comes from the server's `tools/list` on first use, is cached for
+ten minutes and refreshed once when a name is unknown. The tool list the host
+sees never changes during a session, so the host's prompt cache is not broken.
+Skills tell the model to find, read, then call; see the `qyrus-mcp` skill.
+
+Two settings in the private env file (or the host's environment; the file wins)
+change this; restart MCP after editing:
+
+| Setting | Values | Effect |
+|---|---|---|
+| `QYRUS_MCP_TOOLS` | `progressive` (default), `all` | `all` lists every upstream tool, as before; use it for a host that does its own deferred tool loading |
+| `QYRUS_MCP_PINNED_TOOLS` | comma list, for example `qyrus_web_projects_list,qyrus_web_runs_history_list` | Also lists these tools directly in progressive mode. Names the server does not have are ignored; ignored in `all` mode |
+
+`python3 scripts/qyrus_env.py check` rejects an invalid value. The grouping
+rules, naming exceptions and ranking are in the design,
+`docs/plans/qyrus-mcp-progressive-tools.md` in the development repository; the
+bridge's logic is `scripts/qyrus_catalogue.py`.
 
 ## Skills
 
@@ -443,7 +483,11 @@ uv run --with pytest --with fastmcp==4.0.10 --python 3.12 \
 ```
 
 Tests use synthetic keys and a loopback MCP fixture, including a real stdio ↔
-HTTP guide call. The SDK/bootstrap checks may download public packages if
+HTTP guide call and a stand-in Qyrus server that exercises both tool modes
+(`tests/test_mcp_progressive.py`). `tests/test_qyrus_catalogue.py` checks the
+grouping and search rules against the recorded 310-tool list at the
+development repository's `tests/fixtures/qyrus-mcp/` and skips itself in the
+public mirror, which does not carry that file. The SDK/bootstrap checks may download public packages if
 the uv cache is cold. They do not authenticate to Qyrus, spend cloud session time,
 or modify work items. See `tests/trigger-evals.md` for behavioral cases and
 `CHANGELOG.md` for the release summary. Live host loading and authenticated

@@ -35,7 +35,7 @@ After local setup, check only the surfaces needed for the current request:
 
 | Surface | Read-only verification |
 |---|---|
-| Qyrus Aegis MCP | Reconnect, discover tools, call `qyrus_guide_get`, then `qyrus_teams_get_by_api_key` with `{}` |
+| Qyrus Aegis MCP | Reconnect and confirm the host lists six tools (the three core tools plus `qyrus_tools`, `qyrus_tool_schema`, `qyrus_tool_call`; every tool when the file sets `QYRUS_MCP_TOOLS=all`), call `qyrus_guide_get`, then `qyrus_teams_get_by_api_key` with `{}` |
 | Qyrion | Helper-wrapped `capabilities --json`; select the MCP-discovered team per `references/credentials.md`, then verify with `sessions list --json` |
 | qyrusai | Setup prepares the pinned package; the helper's `sdk` action ensures it remains installed before each SDK script |
 

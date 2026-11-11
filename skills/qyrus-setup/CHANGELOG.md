@@ -1,5 +1,9 @@
 # Changelog
 
+## Progressive Qyrus tools — 2026-10-22
+
+- The MCP verification row expects the six-tool list (every tool with `QYRUS_MCP_TOOLS=all`).
+
 ## CLI workflow guidance — 2026-10-09
 
 - Document session names and aliases, paginated project/test discovery,

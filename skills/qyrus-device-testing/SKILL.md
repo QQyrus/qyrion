@@ -93,7 +93,10 @@ subsequent history output, and temporary CLI logs; stdin alone is insufficient.
 Objectives describe user intent and assertions, not invented account aliases.
 
 Capture each run ID immediately. Inspect questions and artifacts, answer
-known facts via `answer-qyrion-agent-questions`, and obtain terminal results.
+known facts via `answer-qyrion-agent-questions`, and obtain terminal results
+with `qyrion sessions result <run_id> --wait --timeout 240 --json --compact`
+(read steps with `sessions steps <run_id> --json --compact --limit 500`; plain
+`--json` is hundreds of KB on a long run, see `references/cli-contract.md`).
 Multiple independent scenarios may use several CLI processes from one agent;
 subagents are optional. Follow the parallel reference for concurrency caps,
 monitoring all parked runs, and mandatory cleanup.

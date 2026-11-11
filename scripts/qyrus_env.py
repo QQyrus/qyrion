@@ -134,6 +134,73 @@ def application_endpoints(value: str) -> tuple[str, str]:
     return f"https://{tenant}.qyrus.com", f"https://{tenant}-mcp.qyrus.com/mcp"
 
 
+def local_service_url(value: str, name: str) -> str:
+    """Accept a session-service URL only when it is on this computer.
+
+    A developer running the Qyrus services locally names them in the private
+    file; any other host is refused so the file can never send the key away
+    from the tenant's own gateway.
+
+    Example:
+        >>> local_service_url("http://127.0.0.1:8081", "QYRION_TESTHUB_URL")
+        'http://127.0.0.1:8081'
+    """
+    try:
+        parts = urlsplit(value)
+        _ = parts.port
+    except ValueError:
+        parts = None
+    if (parts is None or parts.scheme not in ("http", "https") or parts.hostname not in ("localhost", "127.0.0.1")
+            or parts.username or parts.password or parts.query or parts.fragment):
+        raise SetupError(f"{name} may only point at Qyrus services on this computer (http://localhost:<port>).")
+    return value.rstrip("/")
+
+
+def session_service_urls(app_url: str, values: dict[str, str]) -> tuple[str, str]:
+    """Return where Qyrion runs sessions: the tenant gateway, or local services.
+
+    `QYRION_TESTHUB_URL` / `QYRION_RUNBRIDGE_URL` in the private file override
+    the gateway only for services on this computer (`local_service_url`); the
+    key is still checked by the tenant's gateway, so `QYRION_APP_URL` stays the
+    real Qyrus address.
+
+    Example:
+        >>> session_service_urls("https://stg.qyrus.com", {})[0]
+        'https://stg-gateway.qyrus.com/df-ai-sessions-testhub-cli/v1'
+    """
+    tenant = urlsplit(app_url).hostname.split(".")[0]
+    gateway = "https://gateway.qyrus.com" if tenant == "app" else f"https://{tenant}-gateway.qyrus.com"
+    testhub = values.get("QYRION_TESTHUB_URL", "").strip()
+    runbridge = values.get("QYRION_RUNBRIDGE_URL", "").strip()
+    return (
+        local_service_url(testhub, "QYRION_TESTHUB_URL") if testhub else gateway + "/df-ai-sessions-testhub-cli/v1",
+        local_service_url(runbridge, "QYRION_RUNBRIDGE_URL") if runbridge else gateway + "/df-ai-sessions-runbridge-cli/v1",
+    )
+
+
+def mcp_tool_settings(env: dict[str, str]) -> tuple[str, frozenset[str]]:
+    """Read how the MCP bridge offers Qyrus tools: (mode, pinned tool names).
+
+    `QYRUS_MCP_TOOLS` is `progressive` (default: three core tools, pinned tools
+    and the `qyrus_tools` / `qyrus_tool_schema` / `qyrus_tool_call` disclosure
+    tools) or `all` (every upstream tool, for hosts with their own deferred
+    tool loading). `QYRUS_MCP_PINNED_TOOLS` is a comma list of tool names that
+    progressive mode also offers directly. Both come from the private file or
+    the host's environment, the file winning (`load_environment`).
+
+    Example:
+        >>> mcp_tool_settings({"QYRUS_MCP_PINNED_TOOLS": "qyrus_web_projects_list, qyrus_web_runs_history_list"})
+        ('progressive', frozenset({'qyrus_web_projects_list', 'qyrus_web_runs_history_list'}))
+    """
+    mode = env.get("QYRUS_MCP_TOOLS", "").strip().lower() or "progressive"
+    if mode not in {"progressive", "all"}:
+        raise SetupError("QYRUS_MCP_TOOLS must be progressive or all.")
+    pinned = [name.strip() for name in env.get("QYRUS_MCP_PINNED_TOOLS", "").split(",") if name.strip()]
+    if not all(re.fullmatch(r"qyrus_[a-z0-9_]+", name) for name in pinned):
+        raise SetupError("QYRUS_MCP_PINNED_TOOLS must be a comma-separated list of qyrus_* tool names.")
+    return mode, frozenset(pinned)
+
+
 def load_environment(explicit: str | None = None) -> dict[str, str]:
     """Map the selected file to CLI, SDK, and MCP variables in a child process.
 
@@ -152,14 +219,11 @@ def load_environment(explicit: str | None = None) -> dict[str, str]:
            if not k.startswith("QYRION_") and k not in {"QYRUS_API_KEY", "X-API-Key", "QYRUS_MCP_URL"}}
     env.update({"QYRION_API_KEY": key, "QYRUS_API_KEY": key})
     env["QYRUS_ENV_FILE"] = str(selected)
-    for name in ("QYRION_TEAM_ID", "QYRION_USER_EMAIL"):
+    for name in ("QYRION_TEAM_ID", "QYRION_USER_EMAIL", "QYRUS_MCP_TOOLS", "QYRUS_MCP_PINNED_TOOLS"):
         if values.get(name):
             env[name] = values[name]
     env["QYRION_APP_URL"] = app_url
-    tenant = urlsplit(app_url).hostname.split(".")[0]
-    gateway = "https://gateway.qyrus.com" if tenant == "app" else f"https://{tenant}-gateway.qyrus.com"
-    env["QYRION_TESTHUB_URL"] = gateway + "/df-ai-sessions-testhub-cli/v1"
-    env["QYRION_RUNBRIDGE_URL"] = gateway + "/df-ai-sessions-runbridge-cli/v1"
+    env["QYRION_TESTHUB_URL"], env["QYRION_RUNBRIDGE_URL"] = session_service_urls(app_url, values)
     if os.environ.get("QYRION_CLI"):
         env["QYRION_CLI"] = os.environ["QYRION_CLI"]
     env["QYRUS_MCP_URL"] = mcp_url
@@ -217,6 +281,8 @@ def main() -> int:
         if args.action == "configure" and not args.env_file:
             raise SetupError("configure requires --env-file <path>.")
         env = load_environment(args.env_file)
+        if args.action in {"check", "configure"}:
+            mcp_tool_settings(env)  # Catch a typo here, not at the next MCP restart; `run`/`sdk` ignore it.
         if args.action == "configure":
             ensure_sdk()
             selected = resolve_env_file(args.env_file)

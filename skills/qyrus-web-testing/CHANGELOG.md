@@ -1,5 +1,18 @@
 # Changelog
 
+## Compact session output — 2026-10-22
+
+- Step 4 waits and reads steps with `--json --compact` (gated on `compact_session_output`); the Aegis save step keeps
+  the full `--locators` read, a page at a time.
+
+## Save to Web Testing — 2026-10-22
+
+- Step 5 says "save it to my Web Testing" is an Aegis web asset (step 6), never a Qyrion project named "Web Testing".
+
+## Progressive Qyrus tools — 2026-10-22
+
+- Aegis save step reaches non-core tools through `qyrus_tools` / `qyrus_tool_schema` / `qyrus_tool_call`.
+
 ## CLI workflow guidance — 2026-10-09
 
 - Document session names and aliases, paginated project/test discovery,

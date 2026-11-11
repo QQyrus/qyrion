@@ -63,8 +63,13 @@ without `--stream` submits the run and returns while it continues remotely.
 Capture `run_id` immediately, record ownership, then submit the next
 independent objective. Separate `qyrion run` processes are also valid.
 
-Monitor **all** active run IDs using bounded `sessions stream` calls or result
-polls; do not wait indefinitely on one while another is parked. Answer
+Monitor **all** active run IDs with one wait over all of them,
+`qyrion sessions wait --any <run_id> <run_id> ... --timeout 240 --json`
+(feature `session_wait_any`, `cli-contract.md`): it returns on the first
+question, final status or failed start across them; handle that event, then
+wait again on the ids in `watch_next`. Without the feature, use bounded
+`sessions stream` calls or result polls; never wait indefinitely on one while
+another is parked. Answer
 clarifications promptly. Stop launching new work if a shared setup failure
 invalidates the remaining objectives. Unique `--run-name` values help
 reconciliation; they are not an idempotency guarantee. After an ambiguous

@@ -58,7 +58,7 @@ authorization. Honor read-only and no-publish constraints throughout.
 | Generate candidate scenarios/data/assertions | `qyrusai-sdk` skill, shared key |
 | Mobile execution | `qyrus-device-testing` and Qyrion |
 | Browser execution and observed locators | `qyrus-web-testing` and Qyrion |
-| Durable web/API assets and runs | `qyrus-mcp`, live Aegis guide |
+| Durable web/API assets and runs | `qyrus-mcp` (find tools with `qyrus_tools`), live Aegis guide |
 | Diff-driven selection | `qyrus-change-impact`; use web execution for web targets |
 | Questions during a run | `answer-qyrion-agent-questions` |
 | Setup/authentication | `qyrus-setup` |

@@ -34,7 +34,11 @@ IDs must be resolved through Aegis, not substituted from these CLI lists.
 1. Capture every scenario's run ID and terminal result. Read structured steps,
    not the final chat summary, a screenshot, table preview, or initial snapshot.
    Use `private-execution.md` for input/history containing login details.
-2. Check installed help. Current `sessions steps <run-id> --locators --json`
+2. Check installed help. Preservation needs the full rows (locator candidates,
+   inputs, outputs), so do **not** use `--compact` here; `--compact` is for
+   waiting and reporting (`cli-contract.md`, "Read compact, not whole"). Read
+   a page at a time and write each to disk before the next. Current
+   `sessions steps <run-id> --locators --json`
    defaults to **100 rows** and supports `--cursor` and `--limit`. Follow each
    returned `next_cursor` until exhausted. Increasing the limit alone is not
    evidence of completeness; detect repeated cursors and report truncation.

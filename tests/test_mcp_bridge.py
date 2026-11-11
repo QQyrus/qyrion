@@ -12,7 +12,10 @@ from fastmcp.client.transports import StdioTransport
 
 
 def test_stdio_bridge_forwards_guide_and_authenticated_calls(tmp_path):
-    """Initialize, discover, and call over stdio plus HTTP without contacting Qyrus."""
+    """In `all` mode the full proxy still forwards discovery and calls, without contacting Qyrus.
+
+    Progressive mode (the default) is covered end to end in `test_mcp_progressive.py`.
+    """
     scripts = Path(__file__).resolve().parents[1] / "scripts"
     with socket.socket() as sock:
         sock.bind(("127.0.0.1", 0))
@@ -52,7 +55,7 @@ uvicorn.run(server.http_app(middleware=[Middleware(Auth)]), host="127.0.0.1", po
         code = (
             "import sys; sys.path.insert(0, sys.argv[1]); "
             "from qyrus_mcp import build_proxy; "
-            "build_proxy({'QYRUS_MCP_URL':sys.argv[2], 'QYRUS_API_KEY':'synthetic-bridge-key'})"
+            "build_proxy({'QYRUS_MCP_URL':sys.argv[2], 'QYRUS_API_KEY':'synthetic-bridge-key', 'QYRUS_MCP_TOOLS':'all'})"
             ".run(transport='stdio', show_banner=False)"
         )
 

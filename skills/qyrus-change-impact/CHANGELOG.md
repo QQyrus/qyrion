@@ -1,5 +1,9 @@
 # Changelog
 
+## Progressive Qyrus tools — 2026-10-22
+
+- API contract execution points at the `qyrus-mcp` tool-finding path.
+
 ## CLI workflow guidance — 2026-10-09
 
 - Document session names and aliases, paginated project/test discovery,

@@ -35,12 +35,36 @@ qyrion sessions save-test <run-id> --project <project-id> --test-name "Login che
 ```
 
 The objective can say `Log in using @LOGIN_USER and @LOGIN_PASSWORD`.
-Send literal references; never resolve them in the plugin or fetch saved values
-to construct an objective. `sessions create` also accepts `--project`.
-Follow-up messages use the established session project. A reference without
-a selected project must be corrected before provisioning. Saving captures
-Default automatically; old save-data flags are compatibility options, not
-an opt-out. New saves do not require `prepare`.
+Send the reference expressions unresolved; never resolve them in the plugin or
+fetch saved values to construct an objective. `sessions create` also accepts
+`--project`. Follow-up messages use the established session project. A
+reference needs a selected project: without `--project` there is no test data
+to resolve it against. Saving captures Default automatically; old save-data
+flags are compatibility options, not an opt-out. New saves do not require
+`prepare`.
+
+## An @NAME with no test data
+
+A start or follow-up whose `@NAME` matches no test data in the selected project
+is rejected with `unresolved_references`, which names each occurrence
+(`field_index`, `start`, `end`, `name`) and no value. That rejection is a
+decision for the person, not for you: create the variable, correct the message,
+or — only after they confirm the expression is data they typed rather than a
+reference — resend it with `--literal-reference NAME` per confirmed name
+(repeatable on `qyrion run`, `sessions create` and `sessions send`).
+
+On a terminal the CLI names the expressions, asks once, and resends as written
+only on an explicit yes. With `--json`/`--jsonl` it exits 2 and returns the
+occurrences instead of assuming consent. A name the message being sent no
+longer contains is a usage error, so editing the text invalidates an earlier
+confirmation rather than moving it.
+
+A confirmed literal keeps its exact spelling and case and still passes through
+credential detection. Literal is not public text: `Password: @pass1` confirmed
+as literal is still protected and still asks to be hidden. Never add
+`--literal-reference` on your own judgement, never use it to work around a
+missing variable, and never put a secret value on the command line in its
+place — use `projects variables create --value-file` as above.
 
 ## Manage and rerun test data
 
@@ -123,6 +147,16 @@ Use structured arguments directly, never shell out from MCP tools:
 | Readiness | `qyrion_project_test_data_preview` with `subject_id` and `source: test` or `run` |
 | Saved preferences | `qyrion_save_test_data_preference` with `expected_test_updated_at` and requested save flags |
 | Execution | `qyrion_create_session` with `project_id`; `qyrion_save_session_as_test`; `qyrion_rerun_test` or `qyrion_rerun_session` |
+| Unknown `@NAME` | `qyrion_create_session` / `qyrion_send_message` optional `literal_references` |
+
+A rejected submission comes back as a JSON-RPC error whose `data` holds
+`{"code": "unresolved_references", "references": [...]}`. Put the expressions
+to the user, then resend with `literal_references` set to exactly the
+occurrences they confirmed, copied verbatim — never guess offsets, never
+confirm on their behalf, and never retry the same call hoping it passes. On the
+hosted Qyrion MCP the same field is `body.literal_references` and the same
+rejection arrives as `error.code: "unresolved_references"` with
+`error.details.references`.
 
 Rerun/preflight selection uses `test_dataset_id` or `project_test_data: true`.
 Replacement objects contain exactly `name`, `previous_id`, `variable_id`.

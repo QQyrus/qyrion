@@ -91,6 +91,26 @@ Both replay paths require curated replayable steps; missing steps or unsupported
 web session-replay options are concrete blockers, not permission to invent flags
 or silently create a different test/project. Reconcile before any retry.
 
+## Act on a parked session
+
+A run in `waiting_user_input` waits for you; waiting on it again only returns
+the same park. Read `qyrion sessions question <run_id> --json` and act on its
+`waiting_for`:
+
+- `answer`: the agent asked `question`; answer it with `sessions send` (see
+  `answer-qyrion-agent-questions`) or escalate it.
+- `next_instruction`: a live run (a desktop run, or any run without
+  `--mode ci`) did its instruction and `last_message` is what it found. Read it
+  against the objective: send the next step to the same run with
+  `qyrion sessions send <run_id> "<next instruction>"`, one instruction per
+  send, rather than starting a new session; when the work is done or the run
+  is blocked, end the run and report.
+- `replay_input`: a recorded test needs a value only the person has; they
+  enter it with `qyrion sessions send <run_id> --secure`.
+
+A parked run times out after about ten minutes without a reply, so act on it
+before other work.
+
 ## MCP and attribution
 
 For project references, automatic Default capture, dataset management,
@@ -109,3 +129,27 @@ not the target-app test account. Do not request a separate email/gateway token
 or put that identity into the objective to work around missing attribution.
 Deployment and auth configuration determine availability; old run records are
 not automatically backfilled by a CLI/skill update.
+
+## End a live session
+
+A `--mode live` session (a desktop run, or any run started without
+`--mode ci`) parks after each instruction for the next one. When its work is
+done and read, end it with `qyrion sessions finish <run_id> --json` (MCP
+`qyrion_finish_session`): the run ends `completed` with the summary of its last
+instruction and History reads COMPLETED. `qyrion sessions cancel <run_id>` is
+for abandoning a session (stalled, wrong app, no longer needed); it reads
+CANCELLED.
+
+`finish` is refused (exit 1) with the reason and what to do instead while the
+session is still working (wait again), parked on a question (answer it with
+`qyrion sessions send`), or already ended (read `sessions result`).
+
+## Resend a report from History
+
+When asked to email an existing run, do not rerun it. Use `sessions email-report
+RUN_ID --email ADDRESS --idempotency-key SHARE_KEY --json`, then
+`sessions email-status RUN_ID REQUEST_ID --json`. Reuse the key after uncertain
+acceptance; use a new key only for an intentional resend. Recipients are explicit.
+Local/hosted MCP provide qyrion_email_session_report and qyrion_get_report_email_status.
+Hosted sharing takes recipients/report_type inside body. Accepted is provider
+acceptance, not mailbox delivery. Require deployed CLI gateway aliases before use.

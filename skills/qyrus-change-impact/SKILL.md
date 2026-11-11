@@ -104,7 +104,8 @@ authorized.
 
 For web changes, use `qyrus-web-testing` and the same requirement mapping;
 verify the deployed build SHA and use browser flags, without mobile uploads.
-API contract execution uses the live Aegis guide.
+API contract execution uses the live Aegis guide and the `qyrus-mcp` skill's
+`qyrus_tools` / `qyrus_tool_schema` / `qyrus_tool_call` path to reach its tools.
 
 ## Phase 5 — Execute the minimal set
 

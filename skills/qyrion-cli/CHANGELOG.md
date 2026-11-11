@@ -1,5 +1,32 @@
 # Changelog
 
+## Unreleased — 2026-10-22 (compact session output)
+
+- Waits use `sessions result <run_id> --wait --timeout 240 --json --compact`; steps are read with
+  `sessions steps <run_id> --json --compact --limit 500`. Embedded `cli-contract.md` carries the field sets and the
+  `compact_session_output` feature gate.
+
+## Unreleased — 2026-10-22 (save-test is not Web Testing)
+
+- `sessions save-test` saves a Qyrion test; "save it to my Web Testing" is a Web Testing script through the Qyrus MCP
+  (`qyrus-mcp`), never a Qyrion project named "Web Testing". Embedded `execution-routing.md` and `credentials.md` carry
+  the team rule.
+
+## Unreleased — 2026-10-22 (long sessions)
+
+- Waits use `--timeout 240`, and the skill says to start with `sessions create
+  --json` (not `run`) where a host limits one command; the embedded
+  `cli-contract.md` has the "Long sessions in a host that limits one command"
+  paragraph.
+
+## Unreleased — 2026-10-22 (waiting for a session)
+
+- Exit code `5` (`run` parked on an agent question) is in the exit-code table.
+- New paragraph under Core operations: wait with `sessions result --wait
+  --timeout 300 --json`, check `run.status` and `sessions question` between
+  waits, and recover a killed `run` (exit `-9`) from its `run_id`; the
+  embedded `cli-contract.md` documents the 300-second default of `--wait`.
+
 ## CLI workflow guidance — 2026-10-09
 
 - Document session names and aliases, paginated project/test discovery,

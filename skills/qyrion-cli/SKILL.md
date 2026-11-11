@@ -1,6 +1,6 @@
 ---
 name: qyrion-cli
-description: Starts, monitors, replies to, downloads artifacts from, and cancels Qyrus AI mobile and web sessions through the qyrion CLI. Use for explicit qyrion commands, direct session operations (start/stream/send/question/result/cancel), artifact/screenshot download, app upload, device or test listing, and troubleshooting qyrion CLI errors or exit codes. Do not use for deciding what to test (use qyrus-device-testing) or for git-diff test impact analysis (use qyrus-change-impact).
+description: Starts, monitors, replies to, downloads artifacts from, and cancels Qyrus AI mobile and web sessions through the qyrion CLI. Use for explicit qyrion commands, direct session operations (start/stream/send/question/result/cancel), email-report/email-status for existing History reports without rerunning, artifact/screenshot download, app upload, device or test listing, and troubleshooting qyrion CLI errors or exit codes. Do not use for deciding what to test (use qyrus-device-testing) or for git-diff test impact analysis (use qyrus-change-impact).
 ---
 
 <!-- Distilled from: shared/session-workflows.md, shared/private-execution.md, shared/test-preservation.md, shared/execution-routing.md, shared/local-state.md, shared/prerequisites.md, shared/cli-contract.md, shared/event-contract.md, shared/safety-policy.md, apps/qyrion/docs/getting-started.md. -->
@@ -41,6 +41,11 @@ project/test discovery, and platform-correct saved-test reruns. Preserve explici
 user names; otherwise use a short scenario label for multi-scenario runs.
 For any requested save/export, read `references/test-preservation.md`: one
 resolved project/module, all step pages, full coverage mapping and read-back.
+`sessions save-test` saves a Qyrion test into a Qyrion project. "Save it to
+(my) Web Testing" means a Web Testing script in one of the person's Qyrus
+teams, made through the Qyrus MCP (`qyrus-mcp` skill), never a Qyrion
+project named "Web Testing" (`references/execution-routing.md`, Qyrus
+product names).
 
 ## Preflight (mandatory, in order)
 
@@ -115,6 +120,35 @@ qyrion sessions cancel <run_id>
 Always pass `--max-seconds` on streams. Write long messages to a file and use
 `--message-file`, not shell arguments.
 
+To wait for a session, prefer `qyrion sessions result <run_id> --wait --timeout
+240 --json --compact` over streaming or polling `sessions steps`: it returns when the
+run is final or after the timeout (without `--timeout`, `--wait` waits 300
+seconds; older binaries return at once, so pass it; 240 stays clear of hosts that
+limit a call to about five minutes). A wait that ran out exits 0 with a status
+that is not final: the session is still running. In a host that limits one
+command, start the session with `qyrion sessions create ... --mode ci --json`
+(it returns at once) and observe it with these waits; do not hold the command
+with `qyrion run` (`references/cli-contract.md`, "Long sessions"). Check `run.status`; if it
+is not final, run `qyrion sessions question <run_id> --json`, answer, and wait
+again. `--compact` (feature `compact_session_output`) keeps `run.status`,
+`run.step_count`, the newest `run.recent_events` entry, `run.pending_question`,
+the summary and the report, and leaves out the artifacts, messages and events
+that make a plain result hundreds of KB; read steps the same way with
+`sessions steps <run_id> --json --compact --limit 500`, and fall back to the
+plain form only when you need the bulk (`references/cli-contract.md`, "Read
+compact, not whole"). A command that is killed (exit `-9`, for example when `run --jsonl`
+output grows past the host's limit) does not stop the session: take the
+`run_id` from the first output line or `qyrion sessions list --json` and
+continue with `result --wait`.
+
+To wait on several sessions you started (independent scenarios, see
+`references/parallel-orchestration.md`), use one wait over all of them,
+gated on `session_wait_any`: `qyrion sessions wait --any <run_a> <run_b>
+--timeout 240 --json`. It returns on the first `question`, `finished` or
+`failed_to_start` across them, or `timeout`, always with exit 0; handle that
+session (answer, read its result, or report it), then wait again on the ids in
+`watch_next`. Never block on one session while another may be asking.
+
 ## Park state: what a stopped stream means
 
 `--until input-required` exiting 0 means the run parked at
@@ -156,6 +190,7 @@ logged, pasted, or committed.
 | 2 | Invalid usage or missing configuration | fix the command; check `--help` |
 | 3 | Auth/authorization failure | see troubleshooting: verify key, tenant, and team |
 | 4 | Backend availability failure | see troubleshooting |
+| 5 | `qyrion run` parked on an agent question and cannot ask you (`input_required`) | read the question, answer with `qyrion sessions send <run_id> "..."` |
 | 130 | Interrupted (SIGINT) | re-attach with `sessions stream <run_id>` |
 
 ## Troubleshooting

@@ -1,6 +1,6 @@
 {
   "name": "qyrusai-assure",
-  "version": "0.3.7-beta",
+  "version": "0.4.0-beta",
   "description": "QyrusAI Assure combines Qyrus MCP, Qyrion mobile/web sessions, and qyrusai SDK skills for evidence-driven quality and work-management loops.",
   "author": {
     "name": "Qyrus"
@@ -20,7 +20,7 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "QyrusAI Assure",
-    "shortDescription": "Qyrus MCP, web/mobile testing, and quality loops",
+    "shortDescription": "AI-powered web & mobile tests",
     "longDescription": "QyrusAI Assure combines Qyrus MCP, Qyrion mobile/web sessions, and qyrusai SDK skills for evidence-driven quality and work-management loops.",
     "developerName": "Qyrus",
     "category": "Developer Tools",
@@ -34,7 +34,11 @@
       "Reproduce this bug and verify the fix."
     ],
     "logo": "./assets/qyrusai-logo.png",
-    "composerIcon": "./assets/qyrusai-logo.png"
+    "composerIcon": "./assets/qyrusai-logo.png",
+    "websiteURL": "https://qyrus.com/",
+    "supportURL": "https://www.qyrus.com/contact-us/",
+    "privacyPolicyURL": "https://www.qyrus.com/privacy-policy/",
+    "termsOfServiceURL": "https://www.qyrus.com/terms-and-conditions/"
   },
   "mcpServers": "./.mcp.json"
 }

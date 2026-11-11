@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased — 2026-11-02 (the park is named)
+
+- `sessions question` says `waiting_for` (`answer`, `next_instruction`, `replay_input`) and `last_message`; a
+  question park is `answer`, an objective-complete park is `next_instruction` with `question: null` and belongs to
+  the calling workflow (`session-workflows.md` "Act on a parked session").
+
 ## CLI workflow guidance — 2026-10-09
 
 - Document session names and aliases, paginated project/test discovery,

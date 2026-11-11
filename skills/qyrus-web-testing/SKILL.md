@@ -56,17 +56,27 @@ resolved project/module, all step pages, full coverage mapping and read-back.
    parallelize shared account/state assumptions.
 4. Capture `run_id` immediately. A question or `waiting_user_input` is not
    completion. Apply the clarification policy, inspect result/steps/artifacts,
-   and require evidence for each assertion. Submit-only `sessions create`
+   and require evidence for each assertion. Wait with `qyrion sessions result
+   <run_id> --wait --timeout 240 --json --compact` and read steps with
+   `qyrion sessions steps <run_id> --json --compact --limit 500` (plain
+   `--json` is hundreds of KB on a long run and fills your context; check
+   the `compact_session_output` feature first). Submit-only `sessions create`
    needs later result inspection. Bound streams with `--max-seconds`.
 5. When the user requested saving, inspect recorded steps and supported
-   saving options. For a Qyrion reusable test, verify installed help then use
+   saving options. "Save it to (my) Web Testing" is an Aegis web asset
+   (step 6), never a Qyrion project named "Web Testing"
+   (`references/execution-routing.md`, Qyrus product names). For a Qyrion reusable test, verify installed help then use
    `qyrion sessions save-test <run_id> --project <id> --test-name <name> --json`.
    Discover the destination when needed; missing save metadata need not block
    an already executable objective. Do not assume saved login inputs are
    redacted; follow the safety policy's save-time handling.
 6. For an Aegis web asset, retrieve observed steps with
-   `qyrion sessions steps <run_id> --locators --json` (check support first).
-   Discover `qyrus_guide_get`, resolve the destination, translate observed
+   `qyrion sessions steps <run_id> --locators --json` (check support first;
+   this one needs the full rows, so read it a page at a time with `--limit`
+   and write each page out, not `--compact`).
+   Call `qyrus_guide_get`, reach any other Aegis tool through `qyrus_tools`,
+   `qyrus_tool_schema` and `qyrus_tool_call` (`qyrus-mcp` skill), resolve the
+   destination, translate observed
    actions/assertions, validate and deduplicate within the requested save
    scope. Candidate locators are not automatically valid Aegis steps.
    Read back the saved asset; only claim verified reuse after a supported,

@@ -191,3 +191,74 @@ def test_manifest_bootstrap_resolves_installed_plugin(host, tmp_path):
     assert not result.stdout
     assert "Cannot read Qyrus credentials" in result.stderr
     assert "Traceback" not in result.stderr
+
+
+def test_local_session_services_in_the_file_replace_the_gateway(private_env):
+    """A developer running testhub and runbridge locally points Qyrion at them; the key's tenant stays stg."""
+    with private_env.open("a") as handle:
+        handle.write("QYRION_TESTHUB_URL=http://127.0.0.1:8081\nQYRION_RUNBRIDGE_URL=http://localhost:8082/\n")
+    env = qyrus_env.load_environment(str(private_env))
+    assert env["QYRION_TESTHUB_URL"] == "http://127.0.0.1:8081"
+    assert env["QYRION_RUNBRIDGE_URL"] == "http://localhost:8082"
+    assert env["QYRION_APP_URL"] == "https://stg.qyrus.com"
+    assert env["QYRUS_MCP_URL"] == "https://stg-mcp.qyrus.com/mcp"
+
+
+@pytest.mark.parametrize("url", [
+    "https://evil.example/cli", "http://localhost.evil.example:8081", "http://user:secret@localhost:8081",
+    "http://localhost:8081?key=secret", "ftp://localhost:8081",
+])
+def test_session_services_off_this_computer_are_refused_without_echo(private_env, url):
+    """The file can never send the key to a host other than this computer or the tenant gateway."""
+    with private_env.open("a") as handle:
+        handle.write(f"QYRION_TESTHUB_URL={url}\n")
+    with pytest.raises(qyrus_env.SetupError) as error:
+        qyrus_env.load_environment(str(private_env))
+    assert url not in str(error.value)
+    assert "secret" not in str(error.value)
+
+
+def test_mcp_tool_settings_default_to_progressive_with_nothing_pinned():
+    """No setting means the six-tool progressive bridge."""
+    assert qyrus_env.mcp_tool_settings({}) == ("progressive", frozenset())
+
+
+def test_mcp_tool_settings_accept_all_mode_and_a_spaced_pinned_list():
+    """`all` is case-insensitive and pinned names are trimmed, blanks dropped."""
+    env = {"QYRUS_MCP_TOOLS": " ALL ", "QYRUS_MCP_PINNED_TOOLS": "qyrus_web_projects_list , ,qyrus_web_script_get"}
+    assert qyrus_env.mcp_tool_settings(env) == ("all", frozenset({"qyrus_web_projects_list", "qyrus_web_script_get"}))
+
+
+@pytest.mark.parametrize("env,message", [
+    ({"QYRUS_MCP_TOOLS": "some"}, "QYRUS_MCP_TOOLS must be progressive or all."),
+    ({"QYRUS_MCP_PINNED_TOOLS": "web_projects_list"}, "comma-separated list of qyrus_* tool names"),
+    ({"QYRUS_MCP_PINNED_TOOLS": "qyrus_ok;rm -rf"}, "comma-separated list of qyrus_* tool names"),
+])
+def test_mcp_tool_settings_reject_invalid_values(env, message):
+    """A typo fails with a plain sentence instead of silently changing the tool list."""
+    with pytest.raises(qyrus_env.SetupError) as error:
+        qyrus_env.mcp_tool_settings(env)
+    assert message in str(error.value)
+
+
+def test_private_file_tool_settings_win_over_the_inherited_environment(private_env, monkeypatch):
+    """The file is authoritative, as for every other Qyrus setting; unset falls back to the host env."""
+    monkeypatch.setenv("QYRUS_MCP_TOOLS", "all")
+    monkeypatch.setenv("QYRUS_MCP_PINNED_TOOLS", "qyrus_web_projects_list")
+    inherited = qyrus_env.load_environment(str(private_env))
+    assert (inherited["QYRUS_MCP_TOOLS"], inherited["QYRUS_MCP_PINNED_TOOLS"]) == ("all", "qyrus_web_projects_list")
+    with private_env.open("a") as handle:
+        handle.write("QYRUS_MCP_TOOLS=progressive\nQYRUS_MCP_PINNED_TOOLS=qyrus_web_script_get\n")
+    from_file = qyrus_env.load_environment(str(private_env))
+    assert (from_file["QYRUS_MCP_TOOLS"], from_file["QYRUS_MCP_PINNED_TOOLS"]) == ("progressive", "qyrus_web_script_get")
+
+
+def test_check_reports_a_bad_tool_setting_without_echoing_the_key(private_env):
+    """`check` catches a typo in QYRUS_MCP_TOOLS before the next MCP restart does."""
+    with private_env.open("a") as handle:
+        handle.write("QYRUS_MCP_TOOLS=sometimes\n")
+    result = subprocess.run([sys.executable, str(SCRIPTS / "qyrus_env.py"), "check", "--env-file", str(private_env)],
+                            text=True, capture_output=True, timeout=10)
+    assert result.returncode == 2
+    assert "QYRUS_MCP_TOOLS must be progressive or all." in result.stderr
+    assert "synthetic-only-key" not in result.stdout + result.stderr

@@ -1,5 +1,15 @@
 # Changelog
 
+## Product names and teams in SKILL.md — 2026-10-22
+
+- `SKILL.md` says what "save it to my Web Testing" means and to ask which product when "projects" could be Web Testing or
+  API Testing; the team paragraph uses a named or single team without asking and asks with names as choices, never
+  reading every team's lists. The Assure Box runtime sends a thread with the Qyrus tools here before its first Qyrus call.
+
+## Progressive Qyrus tools — 2026-10-22
+
+- The bridge lists six tools by default: the three core tools plus `qyrus_tools`, `qyrus_tool_schema` and `qyrus_tool_call`. Reach every other Qyrus tool by finding it with `qyrus_tools`, reading it with `qyrus_tool_schema` and calling it with `qyrus_tool_call`; pinned tools and `QYRUS_MCP_TOOLS=all` list tools directly. Contract: `docs/plans/qyrus-mcp-progressive-tools.md`.
+
 ## CLI workflow guidance — 2026-10-09
 
 - Document session names and aliases, paginated project/test discovery,

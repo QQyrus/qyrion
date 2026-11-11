@@ -61,6 +61,10 @@ The selected file overrides inherited Qyrion credentials/service overrides.
 The helper sets derived TestHub/Runbridge URLs as well, so an old keyring
 service override cannot redirect the selected key. These follow Qyrion's
 gateway mapping (`app` → `gateway.qyrus.com`, others → `<env>-gateway.qyrus.com`).
+A developer running testhub and runbridge locally may name them in the file
+(`QYRION_TESTHUB_URL` / `QYRION_RUNBRIDGE_URL`); only `localhost` or
+`127.0.0.1` URLs are accepted, and `QYRION_APP_URL` stays the real tenant
+because its gateway still checks the key.
 Use one selected file per environment. Direct Qyrion commands still use
 their normal flags → environment → keyring precedence; `--profile` does not
 override env credentials. Do not pass credential flags. App URL is required
@@ -68,10 +72,24 @@ in shared setup before Qyrion calls. Set `QYRION_TEAM_ID` in the file for
 repeatable automation, or verify the selected profile team after discovery.
 Multiple teams with no user selection require clarification; never guess.
 
+## Which Qyrus tools the host sees
+
+The hosted Qyrus MCP has about 310 tools. By default
+(`QYRUS_MCP_TOOLS=progressive`) the bridge lists six: `qyrus_guide_get`,
+`qyrus_account_capabilities_get`, `qyrus_teams_get_by_api_key`, and the
+disclosure tools `qyrus_tools` (find), `qyrus_tool_schema` (read arguments)
+and `qyrus_tool_call` (call). `QYRUS_MCP_PINNED_TOOLS` (comma list of tool
+names, for example `qyrus_web_projects_list,qyrus_web_runs_history_list`) also
+lists those tools directly. `QYRUS_MCP_TOOLS=all` lists every tool, for hosts
+that do their own deferred tool loading. Put either setting in the private
+file (it wins over the host's environment) and restart MCP; the tool list
+stays fixed for the session. `python3 scripts/qyrus_env.py check` rejects an
+invalid value.
+
 ## Team discovery through MCP
 
-After reconnecting, discover the Qyrus MCP tools and call `qyrus_guide_get`
-first. Read `Start Every Session Here` and `Identifier Map`, then call the
+After reconnecting, confirm the Qyrus MCP tools are listed (six by default)
+and call `qyrus_guide_get` first. Read `Start Every Session Here` and `Identifier Map`, then call the
 discovered `qyrus_teams_get_by_api_key` tool with `{}`. It uses the same key;
 no separate gateway Authorization token is needed for this MCP lookup.
 
@@ -84,8 +102,13 @@ team against the returned membership; a saved selection is intent, not proof
 of current access. Keep Aegis and Qyrion scope distinct if their contracts differ.
 
 - A valid existing user selection takes precedence; do not switch teams silently.
+  A team the request, the brief, notes or a remembered preference names is
+  that selection.
 - One team with no prior selection: select it and tell the user.
-- Multiple teams with no selection: present their names and ask which to use.
+- Multiple teams with no selection: ask which to use, with the team names
+  (never their UUIDs) as choices and one recommended with the reason (the
+  team the task points to, else the first), where the host can show choices.
+  Never read every team's projects or lists instead of asking.
 - No teams: report the missing membership and ask for the intended team UUID
   or administrator help; never substitute the organization ID.
 

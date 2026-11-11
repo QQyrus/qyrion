@@ -29,7 +29,7 @@ def test_host_manifest_patch_versions_match():
     """All host packages advertise the same source version."""
     versions = {json.loads((ROOT / host / "plugin.json").read_text(encoding="utf-8"))["version"]
                 for host in (".claude-plugin", ".codex-plugin", ".cursor-plugin")}
-    assert versions == {"0.3.9"}
+    assert versions == {"0.4.0"}
 
 
 def test_distributed_event_contract_preserves_advisory_evidence():
