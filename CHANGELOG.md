@@ -1,3 +1,7 @@
+## 0.4.1-beta preparation — 2026-11-13
+
+- Document usage-limit error handling and regenerate embedded CLI contracts. Release not yet published.
+
 ## 2026-11-11 — Existing report sharing
 
 - Route report-resend requests to email-report/email-status instead of rerunning. Update canonical CLI/session guidance and generated skill copies. Requires matching deployed gateway aliases.

@@ -553,4 +553,8 @@ They share the existing browser handlers, team authorization, request ledger and
 delivery worker. Publish these two aliases in the Runbridge CLI gateway Swagger;
 no new env variables, tables, cloud resources or credentials are introduced.
 Hosted MCP also requires the updated TestHub catalog. No public Qyrion release
-is cut by this change; 0.4.0 remains unreleased until the release branch is pushed.
+is cut by this change; 0.4.0-beta is published; 0.4.1-beta is prepared but not published.
+
+AS-1728 release preparation: Qyrion **0.4.1-beta** (`0.4.1b0` in Python and
+consumer locks) adds usage-limit codes/messages and exit handling. Publishing
+requires the separately authorized `qyrion/v0.4.1-beta` release branch.

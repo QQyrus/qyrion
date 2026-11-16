@@ -153,3 +153,15 @@ acceptance; use a new key only for an intentional resend. Recipients are explici
 Local/hosted MCP provide qyrion_email_session_report and qyrion_get_report_email_status.
 Hosted sharing takes recipients/report_type inside body. Accepted is provider
 acceptance, not mailbox delivery. Require deployed CLI gateway aliases before use.
+
+
+## Session allowance (newer Qyrion builds)
+
+Check capabilities for `session_usage` before calling `qyrion usage --json`.
+It reads the authenticated user's shared mobile/web session-time allowance;
+it is not model token usage. Use local MCP qyrion_get_usage with no arguments,
+or discover/execute that operation in hosted MCP with selected team context.
+When metered:false is returned, omit quota counters instead of displaying zero.
+Do not infer a balance from run history or retry a start to measure allowance.
+The server's remainingSeconds/resetsAt are authoritative; no allowance top-up
+operation is provided. Older binaries/backends may not support the read yet.

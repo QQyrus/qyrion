@@ -1,6 +1,6 @@
 # QyrusAI Assure
 
-Source version 0.4.0 prepares optional report-email controls across CLI, MCP
+Source version 0.4.1-beta adds usage-limit error handling and retains report-email controls across CLI, MCP
 and retained TUI surfaces. Fresh starts send no email unless recipients are
 selected; linked reruns inherit enabled saved-test settings and support an
 explicit opt-out. Deploy matching backends before releasing this client.
@@ -515,3 +515,7 @@ Sources: [public qyrusai](https://pypi.org/project/qyrusai/),
 [Codex MCP config implementation](https://github.com/openai/codex/blob/main/codex-rs/codex-mcp/src/plugin_config.rs),
 and the current Qyrion docs/source. The attached Aegis guidance was distilled
 into a skill; the attached HTML supplied recipes, not execution authorization.
+
+Prepared release: **0.4.1-beta** (Python metadata `0.4.1b0`), including AS-1728
+usage-limit error handling. Publishing binaries and updating installed plugins
+remain separate from merging this change.
