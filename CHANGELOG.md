@@ -1,3 +1,7 @@
+## Claude community directory submission
+
+- Publish Markdown skills with first-use connector, CLI, and credential checks in the directory folder. The organization ZIP includes the local bridge.
+
 ## Unreleased — Claude distribution
 
 - License the plugin under MIT, add the Claude listing icon, and use the

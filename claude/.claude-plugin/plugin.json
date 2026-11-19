@@ -8,17 +8,5 @@
   },
   "license": "MIT",
   "icon": "./assets/icon.png",
-  "keywords": [
-    "qyrus",
-    "qyrion",
-    "mcp",
-    "mobile",
-    "web",
-    "api-testing",
-    "qyrusai",
-    "quality-loops",
-    "assure"
-  ],
-  "skills": "./skills/",
-  "mcpServers": "./.mcp.json"
+  "skills": "./skills/"
 }

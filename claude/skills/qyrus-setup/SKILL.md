@@ -1,56 +1,18 @@
 ---
 name: qyrus-setup
-description: Set up or update QyrusAI Assure end to end, including missing Python, uv, Qyrion, and qyrusai dependencies and one private env-file path for MCP and web/mobile sessions. Use for plain setup/onboarding requests, accepted CLI updates, missing or obsolete tools, shared X-API-Key, application URL or team selection, key rotation, and MCP connection/authentication failures.
+description: Set up Qyrus access and verify the available tools before testing.
 ---
 
-# Configure Qyrus once
+# qyrus-setup
 
-<!-- Distilled from: README.md, plugin.json, .claude-plugin/marketplace.json, shared/prerequisites.md, shared/credentials.md, shared/update-checks.md, shared/local-state.md, scripts/qyrus_env.py, scripts/qyrus_mcp.py, scripts/qyrus_antigravity.py, scripts/qyrus_updates.py, apps/qyrion/src/qyrion/client/auth.py. -->
+On the first Qyrus request, check which Qyrus MCP tools Claude can see. If available, use the guide and a read-only team lookup to confirm the connection and the user's access. On a host with terminal access, check the existing Qyrion client with `qyrion capabilities --json`. Confirm CLI credentials separately with `qyrion auth teams`. A capability listing alone only verifies the local client.
 
-“Set up QyrusAI Assure” is sufficient: own dependency preparation, shared
-credentials, connection checks, and continuation of the user's task. In Claude
-Code, first follow `references/claude-installation.md` for registration,
-symlink handling, existing installations, and activation status. In Antigravity,
-follow `references/antigravity-installation.md` for native plugin placement and
-the credential-free MCP registration helper; preserve other connectors. Read
-`references/prerequisites.md` for detection and installation; perform missing
-user-local installs within the setup request instead of handing back a checklist.
-For a missing Qyrion CLI, use the newest published public release, including
-betas; setup downloads only the platform binary without checksum-file checks.
-Use `references/credentials.md` for the bundled configure helper and path
-precedence. Reuse a supplied/saved/default private file; ask for a new file/path
-only when missing, never its contents. The helper installs the pinned SDK and
-writes the derived MCP URL. Do not open secrets in model-visible tools.
+If Qyrus MCP is missing, first check whether the organization already offers an approved Qyrus connector. If available, help the user enable it and sign in to the correct tenant. If the organization wants the bundled local Qyrus MCP bridge for Cowork or Claude Code, give its Claude admin these steps:
 
-For an existing installation, follow `references/update-checks.md`: check at
-most once every four hours during plugin use, stay quiet when unchanged, and
-install an available update only when the user accepts or explicitly requests
-it. Keep source/editable/pinned installations and explicit overrides intact.
-After an accepted install, verify the running version and capabilities before
-recording completion. A plugin refresh and a CLI binary update are separate.
-See `references/local-state.md` for private result records and host-memory
-pointers. Do not read all references or repeat setup during every task.
+1. Open [Qyrion Releases](https://github.com/QQyrus/qyrion/releases) and find the newest published Qyrion release, including prereleases. Under **Assets**, download `qyrusai-assure-<version>-claude.zip` matching that release. If that asset is missing, report the missing filename.
+2. In Claude, open **Organization settings → Plugins & skills → Add → Upload a plugin**. Select the organization marketplace (or create one), choose the ZIP, and click **Upload**.
+3. Make QyrusAI Assure available to the intended members. Have the user enable the organization plugin in Cowork or Claude Code and complete its setup. Recheck for the Qyrus tools and verify access with the read-only team lookup. For Claude web chat, use an approved remote connector.
 
-After local setup, check only the surfaces needed for the current request:
+If Qyrion is needed and missing, guide them through the [official Qyrion downloads](https://github.com/QQyrus/qyrion/releases). For an unconfigured CLI, have the user run `qyrion configure` in their own terminal and enter the tenant and credentials privately. Never ask for a key in chat or read a credential file. Recheck the missing capability and resume the original request. If the current host has no terminal, use available connector tools or explain which step needs a CLI-capable host.
 
-| Surface | Read-only verification |
-|---|---|
-| Qyrus Aegis MCP | Reconnect and confirm the host lists six tools (the three core tools plus `qyrus_tools`, `qyrus_tool_schema`, `qyrus_tool_call`; every tool when the file sets `QYRUS_MCP_TOOLS=all`), call `qyrus_guide_get`, then `qyrus_teams_get_by_api_key` with `{}` |
-| Qyrion | Helper-wrapped `capabilities --json`; select the MCP-discovered team per `references/credentials.md`, then verify with `sessions list --json` |
-| qyrusai | Setup prepares the pinned package; the helper's `sdk` action ensures it remains installed before each SDK script |
-
-Do not run paid sessions, create tests, or submit generation requests merely
-to check installation. Continue the user's original task after setup succeeds.
-Installing the plugin makes this setup workflow available; dependency
-installation is performed when setup or a dependent task invokes it. Connecting
-a separate work-management account still requires that connector's flow.
-Keep guide-first MCP team discovery for plugin setup. Updated Qyrion
-`auth teams` uses TestHub; older binaries call usermgmt directly and can
-reject a key that works for MCP. Preserve returned team UUIDs; never select
-an org ID.
-
-Report registration, dependency/connection checks, and host activation
-separately. When setup checks have succeeded and only a reload/new session
-remains, give that single next step; do not ask the user to say "set up" again.
-Preserve a working editable Qyrion installation; a source version different
-from the public CLI release is not by itself a failed capability check.
+Confirm the selected tenant and team before starting a test. Report which capability checks succeeded.
