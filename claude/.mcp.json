@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "qyrus": {
+      "command": "python3",
+      "args": [
+        "${CLAUDE_PLUGIN_ROOT}/scripts/qyrus_mcp_launch.py"
+      ]
+    }
+  }
+}

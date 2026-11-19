@@ -132,7 +132,7 @@ for a relevant Qyrion read-only check rather than guessing a membership.
 ## Environment and authentication boundaries
 
 `QYRION_APP_URL` is the **Qyrus tenant URL**. `--start-url` is the **website
-being tested**. Enter `stg.qyrus.com`, `app.qyrus.com`, or another
+being tested**. Enter `app.qyrus.com` or another
 `<env_name>.qyrus.com` tenant (HTTPS prefix optional). Setup derives
 `https://<env_name>-mcp.qyrus.com/mcp`; `app` stays `app-mcp`, not `mcp`.
 Runtime derives it again from the application URL, so a stale saved

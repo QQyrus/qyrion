@@ -11,6 +11,10 @@ See [the shared CLI contract](shared/cli-contract.md) for exact flags and
 
 [Installation guide and API-key video](https://qqyrus.github.io/qyrion/)
 
+The [Qyrion releases](https://github.com/QQyrus/qyrion/releases) include a
+Claude ZIP for organization marketplace uploads. See the [Claude install
+guide](docs/claude.md) for setup and the [MIT license](LICENSE) for this plugin.
+
 ## Install with your coding agent
 
 Paste this into Codex, Claude Code, or Antigravity:
@@ -132,7 +136,7 @@ The user creates a file outside Git and the plugin cache, for example
 
 ```dotenv
 X-API-Key=<your-xapi-key>
-QYRION_APP_URL=stg.qyrus.com
+QYRION_APP_URL=app.qyrus.com
 ```
 
 Use `.env.example` as a template. Do not paste real keys into chat. On macOS
@@ -150,7 +154,6 @@ when missing (or reuses the cached environment), then derives and writes
 
 | Qyrus application URL | Derived MCP URL |
 |---|---|
-| `stg.qyrus.com` | `https://stg-mcp.qyrus.com/mcp` |
 | `app.qyrus.com` | `https://app-mcp.qyrus.com/mcp` |
 | `<env_name>.qyrus.com` | `https://<env_name>-mcp.qyrus.com/mcp` |
 

@@ -1,0 +1,17 @@
+{
+  "name": "qyrusai-assure",
+  "description": "QyrusAI Assure plugins for Qyrus testing and quality workflows.",
+  "owner": {
+    "name": "Qyrus"
+  },
+  "plugins": [
+    {
+      "name": "qyrusai-assure",
+      "source": "./",
+      "description": "QyrusAI Assure: Qyrus MCP, Qyrion web/mobile sessions, and qyrusai SDK skills."
+    }
+  ],
+  "renames": {
+    "qyrion-agent-plugin": "qyrusai-assure"
+  }
+}

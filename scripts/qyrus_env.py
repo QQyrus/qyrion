@@ -165,8 +165,8 @@ def session_service_urls(app_url: str, values: dict[str, str]) -> tuple[str, str
     real Qyrus address.
 
     Example:
-        >>> session_service_urls("https://stg.qyrus.com", {})[0]
-        'https://stg-gateway.qyrus.com/df-ai-sessions-testhub-cli/v1'
+        >>> session_service_urls("https://app.qyrus.com", {})[0]
+        'https://gateway.qyrus.com/df-ai-sessions-testhub-cli/v1'
     """
     tenant = urlsplit(app_url).hostname.split(".")[0]
     gateway = "https://gateway.qyrus.com" if tenant == "app" else f"https://{tenant}-gateway.qyrus.com"

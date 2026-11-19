@@ -1,3 +1,10 @@
+## Unreleased — Claude distribution
+
+- License the plugin under MIT, add the Claude listing icon, and use the
+  public Qyrus endpoints in setup examples.
+- Publish a Claude-only ZIP and matching `claude/` directory with Qyrion
+  releases. The Claude package uses a file-based MCP launcher.
+
 ## 0.4.1-beta preparation — 2026-11-13
 
 - Document usage-limit error handling and regenerate embedded CLI contracts. Release not yet published.

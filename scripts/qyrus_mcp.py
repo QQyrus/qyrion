@@ -80,7 +80,7 @@ def build_proxy(env: dict[str, str]):
     """Return the stdio server: the full proxy, or the six-tool progressive one.
 
     Example:
-        >>> proxy = build_proxy({"QYRUS_MCP_URL": "https://stg-mcp.qyrus.com/mcp", "QYRUS_API_KEY": "k"})  # doctest: +SKIP
+        >>> proxy = build_proxy({"QYRUS_MCP_URL": "https://app-mcp.qyrus.com/mcp", "QYRUS_API_KEY": "k"})  # doctest: +SKIP
         >>> proxy.run(transport="stdio", show_banner=False)  # doctest: +SKIP
     """
     mode, pinned = mcp_tool_settings(env)
