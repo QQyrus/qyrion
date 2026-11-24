@@ -1,5 +1,7 @@
 # Changelog
 
+- 2026-11-23: Document explicit agent attribution for Qyrion runs.
+
 ## Compact session output — 2026-10-22
 
 - Step 4 waits and reads steps with `--json --compact` (gated on `compact_session_output`); the Aegis save step keeps

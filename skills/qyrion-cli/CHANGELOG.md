@@ -1,5 +1,7 @@
 # Changelog
 
+- 2026-11-23: Document explicit agent attribution for Qyrion runs.
+
 ## Unreleased — 2026-10-22 (compact session output)
 
 - Waits use `sessions result <run_id> --wait --timeout 240 --json --compact`; steps are read with

@@ -1,5 +1,7 @@
 # Changelog
 
+- 2026-11-23: Document explicit agent attribution for Qyrion runs.
+
 ## Compact session output — 2026-10-22
 
 - Terminal results are read with `sessions result --wait --timeout 240 --json --compact` and steps with

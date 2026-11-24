@@ -109,3 +109,13 @@ Report discovered assets, changes, execution IDs, verified outcomes, and
 evidence. Store scoped returned IDs and outcomes via `references/local-state.md`
 and revalidate them before reuse. Never claim a proposed loop or tool is available merely because a
 roadmap mentions it.
+
+### Attribute agent-launched runs
+
+When you know which host initiated the run, add `--launch-agent <id>` to
+`qyrion run`, `qyrion sessions create`, `qyrion sessions rerun`, or `qyrion tests rerun`.
+For local MCP, pass `launch_agent` in the run-creating tool arguments. For hosted
+MCP, put it in the operation's `body` when its advertised schema includes the
+field. Use a stable lowercase launcher ID (up to 32 characters, starting with a letter;
+separate words with underscores). For example, use `claude_code` for Claude Code. Leave it out when the host is unknown. Check command help
+before passing the option to an older CLI.

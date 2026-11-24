@@ -53,7 +53,8 @@ def test_server_definition_has_absolute_paths_and_no_key(entry):
     """The host receives a native argv vector without secrets or root placeholders."""
     assert Path(entry["command"]).is_absolute()
     assert Path(entry["cwd"]).is_absolute()
-    assert Path(entry["args"][-1]).is_absolute()
+    assert Path(entry["args"][3]).is_absolute()
+    assert entry["args"][4:] == ["--launch-agent", "antigravity"]
     assert entry["args"][:3] == ["run", "--quiet", "--script"]
     assert set(entry) == {"command", "args", "cwd"}
     assert "${" not in json.dumps(entry)

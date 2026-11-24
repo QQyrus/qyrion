@@ -266,7 +266,7 @@ change this; restart MCP after editing:
 | Setting | Values | Effect |
 |---|---|---|
 | `QYRUS_MCP_TOOLS` | `progressive` (default), `all` | `all` lists every upstream tool, as before; use it for a host that does its own deferred tool loading |
-| `QYRUS_MCP_PINNED_TOOLS` | comma list, for example `qyrus_web_projects_list,qyrus_web_runs_history_list` | Also lists these tools directly in progressive mode. Names the server does not have are ignored; ignored in `all` mode |
+| `QYRUS_MCP_PINNED_TOOLS` | comma list, for example `qyrus_web_projects_list,qyrion_create_session` | Also lists these tools directly in progressive mode. Names the server does not have are ignored; ignored in `all` mode |
 
 `python3 scripts/qyrus_env.py check` rejects an invalid value. The grouping
 rules, naming exceptions and ranking are in the design,

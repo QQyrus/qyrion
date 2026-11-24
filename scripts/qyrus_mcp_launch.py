@@ -9,7 +9,7 @@ from qyrus_process import launch_command
 def main() -> int:
     """Run the bridge beside this script and return its exit status."""
     server = Path(__file__).resolve().with_name("qyrus_mcp.py")
-    return launch_command(["uv", "run", "--quiet", "--script", str(server)], dict(os.environ))
+    return launch_command(["uv", "run", "--quiet", "--script", str(server), "--launch-agent", "claude_code"], dict(os.environ))
 
 
 if __name__ == "__main__":

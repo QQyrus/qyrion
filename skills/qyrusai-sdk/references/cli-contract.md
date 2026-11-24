@@ -558,3 +558,13 @@ is cut by this change; 0.4.0-beta is published; 0.4.1-beta is prepared but not p
 AS-1728 release preparation: Qyrion **0.4.1-beta** (`0.4.1b0` in Python and
 consumer locks) adds usage-limit codes/messages and exit handling. Publishing
 requires the separately authorized `qyrion/v0.4.1-beta` release branch.
+
+### Attribute agent-launched runs
+
+When you know which host initiated the run, add `--launch-agent <id>` to
+`qyrion run`, `qyrion sessions create`, `qyrion sessions rerun`, or `qyrion tests rerun`.
+For local MCP, pass `launch_agent` in the run-creating tool arguments. For hosted
+MCP, put it in the operation's `body` when its advertised schema includes the
+field. Use a stable lowercase launcher ID (up to 32 characters, starting with a letter;
+separate words with underscores). For example, use `claude_code` for Claude Code. Leave it out when the host is unknown. Check command help
+before passing the option to an older CLI.

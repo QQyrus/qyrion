@@ -20,6 +20,8 @@ from urllib.parse import urlsplit
 
 from qyrus_process import launch_command
 
+RUN_LAUNCH_TOOLS = frozenset({"qyrion_create_session", "qyrion_rerun_session", "qyrion_rerun_test"})
+
 
 class SetupError(ValueError):
     """Describe a configuration problem without disclosing file contents."""
@@ -196,8 +198,8 @@ def mcp_tool_settings(env: dict[str, str]) -> tuple[str, frozenset[str]]:
     if mode not in {"progressive", "all"}:
         raise SetupError("QYRUS_MCP_TOOLS must be progressive or all.")
     pinned = [name.strip() for name in env.get("QYRUS_MCP_PINNED_TOOLS", "").split(",") if name.strip()]
-    if not all(re.fullmatch(r"qyrus_[a-z0-9_]+", name) for name in pinned):
-        raise SetupError("QYRUS_MCP_PINNED_TOOLS must be a comma-separated list of qyrus_* tool names.")
+    if not all(name in RUN_LAUNCH_TOOLS or re.fullmatch(r"qyrus_[a-z0-9_]+", name) for name in pinned):
+        raise SetupError("QYRUS_MCP_PINNED_TOOLS must be a comma-separated list of qyrus_* names or Qyrion launch tools.")
     return mode, frozenset(pinned)
 
 

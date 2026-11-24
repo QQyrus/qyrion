@@ -116,3 +116,13 @@ questions. A pass requires evidence, not just exit 0. Record scoped handles
 and outcomes via `references/local-state.md`; no raw credentials or prompts.
 Finish with a `sessions list --json` sweep and cancel only task-owned sessions
 still active, including pending/running/parked sessions; report failed cleanup.
+
+### Attribute agent-launched runs
+
+When you know which host initiated the run, add `--launch-agent <id>` to
+`qyrion run`, `qyrion sessions create`, `qyrion sessions rerun`, or `qyrion tests rerun`.
+For local MCP, pass `launch_agent` in the run-creating tool arguments. For hosted
+MCP, put it in the operation's `body` when its advertised schema includes the
+field. Use a stable lowercase launcher ID (up to 32 characters, starting with a letter;
+separate words with underscores). For example, use `claude_code` for Claude Code. Leave it out when the host is unknown. Check command help
+before passing the option to an older CLI.

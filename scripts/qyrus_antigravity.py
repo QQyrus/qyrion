@@ -40,7 +40,7 @@ def server_entry(plugin_root: Path, uv_command: str) -> dict:
         raise RegistrationError("uv is unavailable; complete the bundled prerequisite setup first.")
     return {
         "command": str(Path(executable).resolve()),
-        "args": ["run", "--quiet", "--script", str(script)],
+        "args": ["run", "--quiet", "--script", str(script), "--launch-agent", "antigravity"],
         "cwd": str(root),
     }
 

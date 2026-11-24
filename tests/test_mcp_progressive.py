@@ -24,6 +24,7 @@ API_KEY = "synthetic-bridge-key"
 
 BACKEND = '''
 import json, sys
+from pydantic import BaseModel
 from fastmcp import FastMCP
 from fastmcp.exceptions import ToolError
 from starlette.middleware import Middleware
@@ -98,13 +99,31 @@ def qyrus_api_assertion_create(script_id: str, assertion_type: str) -> dict:
     record("qyrus_api_assertion_create", script_id=script_id, assertion_type=assertion_type)
     return {"created": True}
 
+class SessionStart(BaseModel):
+    message: str
+    launch_agent: str | None = None
+
+@server.tool
+def qyrion_create_session(body: SessionStart) -> dict:
+    """Start a Qyrion session with optional launch attribution."""
+    return body.model_dump(exclude_unset=True)
+
+class LegacyRerun(BaseModel):
+    model_config = {"extra": "forbid"}
+    source_run_id: str
+
+@server.tool
+def qyrion_rerun_session(body: LegacyRerun) -> dict:
+    """Accept a replay on an older hosted schema."""
+    return body.model_dump()
+
 uvicorn.run(server.http_app(middleware=[Middleware(Auth)]), host="127.0.0.1", port=port, log_level="critical")
 '''
 
 CORE = ["qyrus_account_capabilities_get", "qyrus_guide_get", "qyrus_teams_get_by_api_key"]
 DISCLOSURE = ["qyrus_tool_call", "qyrus_tool_schema", "qyrus_tools"]
 ALL_UPSTREAM = {*CORE, "qyrus_web_projects_list", "qyrus_web_script_get", "qyrus_web_schedule_pause",
-                "qyrus_web_steps_delete", "qyrus_api_assertion_create"}
+                "qyrus_web_steps_delete", "qyrus_api_assertion_create", "qyrion_create_session", "qyrion_rerun_session"}
 
 
 class Upstream(NamedTuple):
@@ -148,15 +167,15 @@ def upstream(tmp_path):
         process.wait(timeout=10)
 
 
-def bridge(url, api_key=API_KEY, **settings):
+def bridge(url, api_key=API_KEY, *, launch_agent=None, **settings):
     """Return a Client talking to the real bridge over stdio; `settings` are bridge env keys."""
     env = {"QYRUS_MCP_URL": url, "QYRUS_API_KEY": api_key, **settings}
     code = (
         "import json, sys; sys.path.insert(0, sys.argv[1]); "
         "from qyrus_mcp import build_proxy; "
-        "build_proxy(json.loads(sys.argv[2])).run(transport='stdio', show_banner=False)"
+        "build_proxy(json.loads(sys.argv[2]), launch_agent=json.loads(sys.argv[3])).run(transport='stdio', show_banner=False)"
     )
-    transport = StdioTransport(command=sys.executable, args=["-c", code, str(SCRIPTS), json.dumps(env)])
+    transport = StdioTransport(command=sys.executable, args=["-c", code, str(SCRIPTS), json.dumps(env), json.dumps(launch_agent)])
     return Client(transport, timeout=30)
 
 
@@ -244,7 +263,7 @@ def test_browse_overview_service_capability_and_query(upstream):
             )
 
     overview, service, capability, query = asyncio.run(body())
-    assert "Qyrus tools: 8 in total, 3 always offered directly." in overview
+    assert "Qyrus tools: 10 in total, 3 always offered directly." in overview
     assert "- web (4):" in overview and "- api (1):" in overview
     assert "- schedule (1)" not in service and "other (4)" in service  # one-tool capabilities sit under other
     assert "web / schedule — 1 tools:" in capability
@@ -292,6 +311,51 @@ def test_tool_call_relays_the_upstream_result_unchanged(upstream):
     assert asyncio.run(body()) == {"script_id": "s-1", "steps": []}
     assert upstream_calls(call_log) == [
         {"name": "qyrus_web_script_get", "arguments": {"script_id": "s-1", "include_steps": True}}]
+
+
+def test_progressive_call_defaults_to_the_configured_host(upstream):
+    """A known host supplies attribution when omitted and preserves an explicit value."""
+    async def start_sessions():
+        """Return the actual upstream bodies from two successive calls."""
+        async with bridge(upstream.url, launch_agent="claude_code") as client:
+            defaults = await client.call_tool("qyrus_tool_call", {
+                "name": "qyrion_create_session", "arguments": {"body": {"message": "Check login"}},
+            })
+            explicit = await client.call_tool("qyrus_tool_call", {
+                "name": "qyrion_create_session",
+                "arguments": {"body": {"message": "Check checkout", "launch_agent": "codex"}},
+            })
+        return defaults.data, explicit.data
+
+    assert asyncio.run(start_sessions()) == (
+        {"message": "Check login", "launch_agent": "claude_code"},
+        {"message": "Check checkout", "launch_agent": "codex"},
+    )
+
+
+@pytest.mark.parametrize("mode", ["progressive", "all"])
+def test_direct_calls_default_to_the_configured_host(upstream, mode):
+    """Pinned and all-tools calls share the default and support older upstream schemas."""
+    async def launch():
+        """Return the upstream bodies for defaulted, explicit, and legacy calls."""
+        async with bridge(
+            upstream.url,
+            launch_agent="antigravity",
+            QYRUS_MCP_TOOLS=mode,
+            QYRUS_MCP_PINNED_TOOLS="qyrion_create_session,qyrion_rerun_session",
+        ) as client:
+            default = await client.call_tool("qyrion_create_session", {"body": {"message": "Check login"}})
+            explicit = await client.call_tool("qyrion_create_session", {
+                "body": {"message": "Check checkout", "launch_agent": "codex"},
+            })
+            legacy = await client.call_tool("qyrion_rerun_session", {"body": {"source_run_id": "prior-run"}})
+        return default.data, explicit.data, legacy.data
+
+    assert asyncio.run(launch()) == (
+        {"message": "Check login", "launch_agent": "antigravity"},
+        {"message": "Check checkout", "launch_agent": "codex"},
+        {"source_run_id": "prior-run"},
+    )
 
 
 def test_tool_call_with_a_wrong_argument_returns_the_schema_and_never_reaches_qyrus(upstream):

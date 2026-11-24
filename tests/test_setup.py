@@ -231,8 +231,8 @@ def test_mcp_tool_settings_accept_all_mode_and_a_spaced_pinned_list():
 
 @pytest.mark.parametrize("env,message", [
     ({"QYRUS_MCP_TOOLS": "some"}, "QYRUS_MCP_TOOLS must be progressive or all."),
-    ({"QYRUS_MCP_PINNED_TOOLS": "web_projects_list"}, "comma-separated list of qyrus_* tool names"),
-    ({"QYRUS_MCP_PINNED_TOOLS": "qyrus_ok;rm -rf"}, "comma-separated list of qyrus_* tool names"),
+    ({"QYRUS_MCP_PINNED_TOOLS": "web_projects_list"}, "comma-separated list of qyrus_* names or Qyrion launch tools"),
+    ({"QYRUS_MCP_PINNED_TOOLS": "qyrus_ok;rm -rf"}, "comma-separated list of qyrus_* names or Qyrion launch tools"),
 ])
 def test_mcp_tool_settings_reject_invalid_values(env, message):
     """A typo fails with a plain sentence instead of silently changing the tool list."""

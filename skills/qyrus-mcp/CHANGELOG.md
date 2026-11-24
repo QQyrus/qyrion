@@ -1,5 +1,7 @@
 # Changelog
 
+- 2026-11-23: Document explicit agent attribution for Qyrion runs.
+
 ## Product names and teams in SKILL.md — 2026-10-22
 
 - `SKILL.md` says what "save it to my Web Testing" means and to ask which product when "projects" could be Web Testing or

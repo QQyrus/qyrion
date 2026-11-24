@@ -4,7 +4,7 @@
       "command": "python3",
       "args": [
         "-c",
-        "import os, sys; from pathlib import Path; root = Path(os.environ.get('CLAUDE_PLUGIN_ROOT') or os.getcwd()); sys.path.insert(0, str(root / 'scripts')); from qyrus_process import launch_command; raise SystemExit(launch_command(['uv', 'run', '--quiet', '--script', str(root / 'scripts/qyrus_mcp.py')], dict(os.environ)))"
+        "import os, sys; from pathlib import Path; root = Path(os.environ.get('CLAUDE_PLUGIN_ROOT') or os.getcwd()); sys.path.insert(0, str(root / 'scripts')); from qyrus_process import launch_command; raise SystemExit(launch_command(['uv', 'run', '--quiet', '--script', str(root / 'scripts/qyrus_mcp.py'), *(['--launch-agent', 'claude_code'] if os.environ.get('CLAUDE_PLUGIN_ROOT') else [])], dict(os.environ)))"
       ],
       "cwd": "."
     }

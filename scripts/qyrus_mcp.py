@@ -21,6 +21,7 @@ and a transport failure reaches the host as a fixed sentence, never the raw
 error. It deliberately does not retry, cache results, or write to disk.
 """
 
+import argparse
 import logging
 import sys
 from typing import Any
@@ -29,10 +30,12 @@ from fastmcp import Client
 from fastmcp.client.transports import StreamableHttpTransport
 from fastmcp.exceptions import ToolError
 from fastmcp.server import create_proxy
+from fastmcp.server.middleware import CallNext, Middleware, MiddlewareContext
 from fastmcp.tools import ToolResult
+from mcp.types import CallToolRequestParams
 
 from qyrus_catalogue import CORE_TOOLS, SCHEMA_LIMIT, CatalogueCache, CatalogueTool
-from qyrus_env import SetupError, load_environment, mcp_tool_settings
+from qyrus_env import RUN_LAUNCH_TOOLS, SetupError, load_environment, mcp_tool_settings
 
 DISCLOSURE_TOOLS = ("qyrus_tools", "qyrus_tool_schema", "qyrus_tool_call")
 UNREACHABLE = "Qyrus MCP could not be reached. Check the private env file and endpoint, then restart MCP."
@@ -76,7 +79,48 @@ def _client(env: dict[str, str]) -> Client:
     return Client(_transport(env), timeout=60, init_timeout=30)
 
 
-def build_proxy(env: dict[str, str]):
+def attributed_arguments(
+    arguments: dict[str, Any], schema: dict[str, Any], launch_agent: str | None,
+) -> dict[str, Any]:
+    """Add a launcher default when the caller omitted it and the tool accepts it.
+
+    Example:
+        >>> attributed_arguments({"body": {}}, {"properties": {"body": {"properties": {"launch_agent": {}}}}}, "claude_code")
+        {'body': {'launch_agent': 'claude_code'}}
+    """
+    body = arguments.get("body")
+    fields = schema.get("properties", {}).get("body", {}).get("properties", {})
+    if launch_agent and isinstance(body, dict) and "launch_agent" not in body and "launch_agent" in fields:
+        return {**arguments, "body": {**body, "launch_agent": launch_agent}}
+    return arguments
+
+
+class LaunchAgentMiddleware(Middleware):
+    """Apply the launcher default to tools exposed directly by the proxy."""
+
+    def __init__(self, launch_agent: str) -> None:
+        """Use the host identity configured by the local plugin launcher."""
+        self.launch_agent = launch_agent
+
+    async def on_call_tool(
+        self, context: MiddlewareContext[CallToolRequestParams],
+        call_next: CallNext[CallToolRequestParams, ToolResult],
+    ) -> ToolResult:
+        """Apply the default with the current tool schema before forwarding the request."""
+        message = context.message
+        server_context = context.fastmcp_context
+        arguments = message.arguments or {}
+        body = arguments.get("body")
+        if message.name in RUN_LAUNCH_TOOLS and server_context and isinstance(body, dict) and "launch_agent" not in body:
+            tool = await server_context.fastmcp.get_tool(message.name)
+            if tool is not None:
+                with_agent = attributed_arguments(arguments, tool.parameters, self.launch_agent)
+                if with_agent is not arguments:
+                    context = context.copy(message=message.model_copy(update={"arguments": with_agent}))
+        return await call_next(context)
+
+
+def build_proxy(env: dict[str, str], *, launch_agent: str | None = None):
     """Return the stdio server: the full proxy, or the six-tool progressive one.
 
     Example:
@@ -88,9 +132,11 @@ def build_proxy(env: dict[str, str]):
     if mode == "progressive":
         settings["instructions"] = PROGRESSIVE_INSTRUCTIONS
     proxy = create_proxy(_client(env), **settings)
+    if launch_agent:
+        proxy.add_middleware(LaunchAgentMiddleware(launch_agent))
     if mode == "all":
         return proxy
-    register_disclosure_tools(proxy, env)
+    register_disclosure_tools(proxy, env, launch_agent=launch_agent)
     proxy.enable(names={*CORE_TOOLS, *pinned, *DISCLOSURE_TOOLS}, only=True)
     return proxy
 
@@ -105,7 +151,7 @@ async def fetch_catalogue_tools(env: dict[str, str]) -> list[CatalogueTool]:
     return [CatalogueTool(t.name, t.description or "", t.inputSchema or {}) for t in listed]
 
 
-def register_disclosure_tools(proxy, env: dict[str, str]) -> CatalogueCache:
+def register_disclosure_tools(proxy, env: dict[str, str], *, launch_agent: str | None = None) -> CatalogueCache:
     """Add `qyrus_tools`, `qyrus_tool_schema` and `qyrus_tool_call` to the proxy.
 
     The catalogue is fetched with the first call that needs it and cached for
@@ -140,7 +186,7 @@ def register_disclosure_tools(proxy, env: dict[str, str]) -> CatalogueCache:
 
     @proxy.tool(name="qyrus_tool_call", description=TOOL_CALL_DESCRIPTION)
     async def qyrus_tool_call(name: str, arguments: dict[str, Any] | None = None) -> ToolResult:
-        """Check `arguments` against the schema, then call the upstream tool unchanged."""
+        """Check arguments against the schema and forward the configured launcher when supported."""
         catalogue = await cache.get_with_tool(name)
         if catalogue is None:
             raise ToolError(f"No such Qyrus tool: {name}. Use qyrus_tools to find the exact name.")
@@ -151,6 +197,8 @@ def register_disclosure_tools(proxy, env: dict[str, str]) -> CatalogueCache:
                 f"Arguments do not match {name}: {problem}. Qyrus was not called.\n"
                 + catalogue.schema_block(catalogue.entries[name])
             )
+        if name in RUN_LAUNCH_TOOLS:
+            arguments = attributed_arguments(arguments, catalogue.entries[name].tool.input_schema, launch_agent)
         return await call_upstream(env, name, arguments)
 
     return cache
@@ -169,9 +217,12 @@ async def call_upstream(env: dict[str, str], name: str, arguments: dict[str, Any
 
 def main() -> int:
     """Run a stdio-only proxy without exposing raw transport errors or logs."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--launch-agent", choices=("claude_code", "antigravity"))
+    args = parser.parse_args()
     logging.disable(logging.CRITICAL)
     try:
-        proxy = build_proxy(load_environment())
+        proxy = build_proxy(load_environment(), launch_agent=args.launch_agent)
         proxy.run(transport="stdio", show_banner=False)
         return 0
     except SetupError as exc:

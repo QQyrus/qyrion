@@ -1,8 +1,16 @@
+## 0.4.3-beta - 2026-11-24
+
+- Forward supported launch-agent attribution from the assistant integrations on starts and reruns.
+
 ## Claude community directory submission
 
 - Publish Markdown skills with first-use connector, CLI, and credential checks in the directory folder. The organization ZIP includes the local bridge.
 
 ## Unreleased — Claude distribution
+
+- Report the known launching agent on Qyrion starts and re-runs. Claude Code
+  and Antigravity launchers supply defaults for direct and progressive MCP calls when
+  the hosted operation advertises the attribution field.
 
 - License the plugin under MIT, add the Claude listing icon, and use the
   public Qyrus endpoints in setup examples.

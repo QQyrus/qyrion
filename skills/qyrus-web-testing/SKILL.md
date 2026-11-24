@@ -89,3 +89,13 @@ resolved project/module, all step pages, full coverage mapping and read-back.
 If saving is unavailable, finish the authorized Qyrion verification and keep
 only a sanitized export candidate. State that the durable asset is pending;
 do not fabricate IDs, locators, availability, or saved-test success.
+
+### Attribute agent-launched runs
+
+When you know which host initiated the run, add `--launch-agent <id>` to
+`qyrion run`, `qyrion sessions create`, `qyrion sessions rerun`, or `qyrion tests rerun`.
+For local MCP, pass `launch_agent` in the run-creating tool arguments. For hosted
+MCP, put it in the operation's `body` when its advertised schema includes the
+field. Use a stable lowercase launcher ID (up to 32 characters, starting with a letter;
+separate words with underscores). For example, use `claude_code` for Claude Code. Leave it out when the host is unknown. Check command help
+before passing the option to an older CLI.
